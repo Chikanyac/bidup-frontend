@@ -286,12 +286,16 @@ async function login(){
 
   const data = await res.json();
 
-  if(data.token){
-    localStorage.setItem("token", data.token);
-    currentUser = data.user;
-    toggleAuth(false);
-    updateUI();
-  }
+if (data.token) {
+  localStorage.setItem("token", data.token);
+
+  // ✅ STORE USER FOR SELLER DASHBOARD
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  currentUser = data.user;
+
+  alert("Login successful");
+  toggleAuth(false);
 }
 
 // BID
