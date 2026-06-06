@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidUp MVP - Zimbabwe Vehicle Auctions</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand:#0a7c5a;
+  --brand-dark:#065f46;
+}
+body{font-family:Outfit, sans-serif; background:#f8fafc;}
+.glass{backdrop-filter:blur(14px);}
+</style>
+</head>
+
+<body class="text-slate-800">
+
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
+  <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
+
+    <div class="flex flex-col leading-tight">
+      <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
+      <span style="font-size:10px; letter-spacing:0.2em; font-weight:800; color:#065f46;">
+        BID. WIN. DRIVE.
+      </span>
+    </div>
+
+    <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
+      <a href="#home">Home</a>
+      <a href="#live">Live Auctions</a>
+      <a href="#sell">Sell</a>
+      <a href="#members">Memberships</a>
+
+      <!-- LOGIN BUTTON (NEW) -->
+      <button onclick="toggleAuth(true)" class="bg-[var(--brand)] text-white px-4 py-2 rounded-xl text-sm font-bold">
+        Login
+      </button>
+    </nav>
+
+    <button onclick="toggleMenu()" class="md:hidden">☰</button>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div id="menu" class="hidden fixed top-16 left-0 right-0 bg-white border-b p-4 md:hidden">
+  <a href="#home" class="block py-2">Home</a>
+  <a href="#live" class="block py-2">Live Auctions</a>
+  <a href="#sell" class="block py-2">Sell</a>
+  <a href="#members" class="block py-2">Memberships</a>
+
+  <button onclick="toggleAuth(true)" class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl">
+    Login
+  </button>
+</div>
+
+<!-- HERO -->
+<section id="home" class="pt-28 bg-gradient-to-br from-[#0a7c5a] to-emerald-700 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <h2 class="text-4xl md:text-6xl font-black leading-tight">
+      Zimbabwe's Trusted<br>Vehicle Auction Marketplace
+    </h2>
+    <p class="mt-4 text-lg text-white/90 max-w-xl">
+      Buy and sell verified vehicles through secure real-time auctions.
+    </p>
+  </div>
+</section>
+
+<!-- LIVE AUCTIONS -->
+<section id="live" class="max-w-7xl mx-auto px-6 py-16">
+  <h3 class="text-3xl font-bold mb-6">Live Auctions</h3>
+
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <div class="bg-white rounded-2xl shadow p-4" data-car-id="aqua">
+      <h4 class="font-bold text-lg">Toyota Aqua</h4>
+      <p class="text-sm text-slate-500">2019 Hybrid</p>
+
+      <p class="mt-2 text-xl font-black current" data-price="4200">$4,200</p>
+
+      <p class="text-xs text-slate-500 mt-1 bidder">Highest Bidder: Anonymous</p>
+
+      <button onclick="bid(this)" class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl">
+        Place Bid
+      </button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4" data-car-id="fit">
+      <h4 class="font-bold text-lg">Honda Fit</h4>
+      <p class="text-sm text-slate-500">2020 1.3L</p>
+
+      <p class="mt-2 text-xl font-black current" data-price="5100">$5,100</p>
+
+      <p class="text-xs text-slate-500 mt-1 bidder">Highest Bidder: Anonymous</p>
+
+      <button onclick="bid(this)" class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl">
+        Place Bid
+      </button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4" data-car-id="cx5">
+      <h4 class="font-bold text-lg">Mazda CX-5</h4>
+      <p class="text-sm text-slate-500">2018 AWD</p>
+
+      <p class="mt-2 text-xl font-black current" data-price="8750">$8,750</p>
+
+      <p class="text-xs text-slate-500 mt-1 bidder">Highest Bidder: Anonymous</p>
+
+      <button onclick="bid(this)" class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl">
+        Place Bid
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- SELL -->
+<section id="sell" class="bg-slate-50 py-16">
+  <div class="max-w-4xl mx-auto px-6">
+    <h3 class="text-3xl font-bold mb-6">Sell Your Vehicle</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow space-y-3">
+      <input class="w-full border p-3 rounded-xl" placeholder="Make">
+      <input class="w-full border p-3 rounded-xl" placeholder="Model">
+      <input class="w-full border p-3 rounded-xl" placeholder="Year">
+      <input class="w-full border p-3 rounded-xl" placeholder="Mileage">
+      <input class="w-full border p-3 rounded-xl" placeholder="Fuel Type">
+
+      <button class="w-full bg-[var(--brand)] text-white py-3 rounded-xl font-bold">
+        Submit Listing
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERSHIPS -->
+<section id="members" class="max-w-7xl mx-auto px-6 py-16">
+  <h3 class="text-3xl font-bold mb-6">Memberships</h3>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h4 class="font-bold">Free</h4>
+      <p class="text-sm text-slate-500">Basic bidding access</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow border-2 border-[var(--brand)]">
+      <h4 class="font-bold">Pro</h4>
+      <p class="text-sm text-slate-500">Unlimited bidding + alerts</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h4 class="font-bold">Dealer</h4>
+      <p class="text-sm text-slate-500">Bulk listings & analytics</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 text-white p-10 text-left">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
+
+    <div>
+      <h3 class="font-bold text-lg mb-2">BidUp</h3>
+      <p>Zimbabwe's Trusted Vehicle Auction Marketplace</p>
+    </div>
+
+  </div>
+</footer>
+
+<!-- ===================== -->
+<!-- LOGIN MODAL (NEW) -->
+<!-- ===================== -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+  <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow">
+
+    <h2 class="text-2xl font-bold mb-4">Login / Register</h2>
+
+    <input id="email" class="w-full border p-3 rounded-xl mb-3" placeholder="Email">
+    <input id="password" type="password" class="w-full border p-3 rounded-xl mb-3" placeholder="Password">
+
+    <button onclick="login()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold mb-2">
+      Login
+    </button>
+
+    <button onclick="register()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold">
+      Register
+    </button>
+
+    <button onclick="toggleAuth(false)" class="mt-3 text-sm text-slate-500 w-full">
+      Close
+    </button>
+
+  </div>
+</div>
+
+<script>
+const socket = io("https://bidup-phlw.onrender.com");
+
+let currentUser = null;
+
+// =====================
+// AUTH MODAL
+// =====================
+function toggleAuth(show){
+  document.getElementById("authModal").classList.toggle("hidden", !show);
+}
+
+// =====================
+// REGISTER
+// =====================
+async function register(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  await fetch("https://bidup-phlw.onrender.com/register", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      name: email.split("@")[0],
+      email,
+      password
+    })
+  });
+
+  alert("Registered. Now login.");
+}
+
+// =====================
+// LOGIN
+// =====================
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("https://bidup-phlw.onrender.com/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    localStorage.setItem("token", data.token);
+    currentUser = data.user;
+    alert("Login successful");
+    toggleAuth(false);
+  } else {
+    alert("Login failed");
+  }
+}
+
+// =====================
+// BID FUNCTION (UPDATED)
+// =====================
+function bid(btn){
+  const card = btn.closest("[data-car-id]");
+  const priceEl = card.querySelector(".current");
+
+  let price = parseInt(priceEl.dataset.price);
+  price += 100;
+
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    alert("Please login first");
+    toggleAuth(true);
+    return;
+  }
+
+  socket.emit("placeBid", {
+    carId: card.dataset.carId,
+    amount: price,
+    token
+  });
+}
+
+// =====================
+// REAL TIME UPDATES
+// =====================
+socket.on("bidUpdate", (data) => {
+  const card = document.querySelector(`[data-car-id="${data.carId}"]`);
+  if(!card) return;
+
+  const priceEl = card.querySelector(".current");
+  const bidder = card.querySelector(".bidder");
+
+  priceEl.dataset.price = data.price;
+  priceEl.textContent = "$" + data.price.toLocaleString();
+
+  if(bidder){
+    bidder.textContent = "Highest Bidder: " + data.user;
+  }
+});
+
+// =====================
+// MENU
+// =====================
+function toggleMenu(){
+  document.getElementById('menu').classList.toggle('hidden');
+}
+
+// =====================
+// COUNTDOWN
+// =====================
+setInterval(()=>{
+  document.querySelectorAll('.countdown').forEach(el=>{
+    let t = parseInt(el.dataset.time);
+    if(t > 0){
+      t--;
+      el.dataset.time = t;
+
+      let m = Math.floor(t/60);
+      let s = t%60;
+
+      el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }
+  });
+},1000);
+</script>
+
+</body>
+</html>
