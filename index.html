@@ -7,7 +7,6 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -18,13 +17,15 @@
 }
 body{font-family:Outfit, sans-serif; background:#f8fafc;}
 .glass{backdrop-filter:blur(14px);}
-.badge{
+
+/* USER BADGE */
+.user-badge{
   background:#065f46;
   color:white;
-  padding:4px 10px;
+  padding:6px 10px;
   border-radius:999px;
   font-size:12px;
-  font-weight:700;
+  font-weight:600;
 }
 </style>
 </head>
@@ -42,27 +43,30 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       </span>
     </div>
 
-    <nav class="hidden md:flex gap-4 text-sm font-medium items-center">
+    <!-- USER STATE -->
+    <div class="flex items-center gap-3">
 
-      <a href="#home">Home</a>
-      <a href="#live">Live Auctions</a>
-      <a href="#sell">Sell</a>
-      <a href="#members">Memberships</a>
+      <div id="userBadge" class="hidden user-badge"></div>
 
-      <!-- USER STATE -->
-      <div id="userBadge" class="hidden badge"></div>
+      <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
 
-      <button id="loginBtn" onclick="toggleAuth(true)"
-        class="bg-[var(--brand)] text-white px-4 py-2 rounded-xl text-sm font-bold">
-        Login
-      </button>
+        <a href="#home">Home</a>
+        <a href="#live">Live Auctions</a>
+        <a href="#sell">Sell</a>
+        <a href="#members">Memberships</a>
 
-      <button id="logoutBtn" onclick="logout()"
-        class="hidden bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
-        Logout
-      </button>
+        <button id="authBtn" onclick="toggleAuth(true)"
+          class="bg-[var(--brand)] text-white px-4 py-2 rounded-xl text-sm font-bold">
+          Login / Register
+        </button>
 
-    </nav>
+        <button id="logoutBtn" onclick="logout()"
+          class="hidden bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
+          Logout
+        </button>
+
+      </nav>
+    </div>
 
     <button onclick="toggleMenu()" class="md:hidden">☰</button>
   </div>
@@ -74,6 +78,14 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   <a href="#live" class="block py-2">Live Auctions</a>
   <a href="#sell" class="block py-2">Sell</a>
   <a href="#members" class="block py-2">Memberships</a>
+
+  <button onclick="toggleAuth(true)" class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl">
+    Login / Register
+  </button>
+
+  <button onclick="logout()" class="mt-2 w-full bg-red-600 text-white py-2 rounded-xl">
+    Logout
+  </button>
 </div>
 
 <!-- HERO -->
@@ -89,12 +101,11 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 </section>
 
 <!-- LIVE AUCTIONS -->
-<section id="live" class="max-w-7xl mx-auto px-6 py-16">
-  <h3 class="text-3xl font-bold mb-6">Live Auctions</h3>
-  <div id="auctionGrid" class="grid md:grid-cols-3 gap-6">
-    <div id="loadingText" class="text-slate-500">Loading live auctions...</div>
-  </div>
-</section>
+<div id="auctionGrid" class="grid md:grid-cols-3 gap-6">
+ <div id="loadingText" class="text-slate-500">
+  Loading live auctions...
+</div>
+</div>
 
 <!-- SELL -->
 <section id="sell" class="bg-slate-50 py-16">
@@ -137,7 +148,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </div>
 </section>
 
-<!-- FOOTER (RESTORED + CLEAN) -->
+<!-- FOOTER (UNCHANGED) -->
 <footer class="bg-slate-900 text-white p-10 text-left">
   <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
 
@@ -149,19 +160,19 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
     <div>
       <h4 class="font-semibold mb-2">Quick Links</h4>
       <ul class="space-y-1 text-slate-300">
-        <li><a href="#live">Live Auctions</a></li>
-        <li><a href="#sell">Sell Vehicle</a></li>
-        <li><a href="#members">Memberships</a></li>
-        <li>Contact Us</li>
+        <li><a href="#live" class="hover:text-white">Live Auctions</a></li>
+        <li><a href="#sell" class="hover:text-white">Sell Vehicle</a></li>
+        <li><a href="#members" class="hover:text-white">Memberships</a></li>
+        <li>- Contact Us</li>
       </ul>
     </div>
 
     <div>
       <h4 class="font-semibold mb-2">Support</h4>
       <ul class="space-y-1 text-slate-300">
-        <li>Terms & Conditions</li>
-        <li>Privacy Policy</li>
-        <li>Help Centre</li>
+        <li>- Terms & Conditions</li>
+        <li>- Privacy Policy</li>
+        <li>- Help Centre</li>
       </ul>
     </div>
 
@@ -171,29 +182,46 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       <p>support@bidup.co.zw</p>
       <p>+263 XX XXX XXXX</p>
     </div>
+
+  </div>
+
+  <div class="text-center mt-6">
+    <a href="#home" class="text-xs text-slate-400 hover:text-white">↑ Back to top</a>
   </div>
 
   <div class="text-center mt-8 text-slate-400 text-xs">
     © 2026 BidUp. All Rights Reserved.
   </div>
+
+  <p class="mt-2">
+    <a href="https://wa.me/263XXXXXXXXX" target="_blank" class="text-green-400 hover:text-green-300">
+      Chat on WhatsApp
+    </a>
+  </p>
 </footer>
 
 <!-- AUTH MODAL -->
 <div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
   <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow">
 
-    <h2 class="text-2xl font-bold mb-4">Login</h2>
+    <h2 class="text-2xl font-bold mb-4">Login / Register</h2>
 
     <input id="email" class="w-full border p-3 rounded-xl mb-3" placeholder="Email">
     <input id="password" type="password" class="w-full border p-3 rounded-xl mb-3" placeholder="Password">
 
-    <button onclick="login()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold">
+    <button onclick="login()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold mb-2">
       Login
     </button>
 
-    <button onclick="toggleAuth(false)" class="mt-3 text-sm w-full">
+    <button onclick="register()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold">
+      Register
+    </button>
+
+    <button onclick="toggleAuth(false)" class="mt-3 text-sm text-slate-500 w-full">
       Close
     </button>
+
   </div>
 </div>
 
@@ -202,30 +230,50 @@ const socket = io("https://bidup-phlw.onrender.com");
 
 let currentUser = null;
 
-// ================= AUTH =================
-function toggleAuth(v){
-  document.getElementById("authModal").classList.toggle("hidden", !v);
-}
-
 function updateUI(){
   const token = localStorage.getItem("token");
 
-  if(token){
-    const decoded = jwt_decode(token);
-    document.getElementById("userBadge").classList.remove("hidden");
-    document.getElementById("userBadge").innerText = decoded.email;
+  const badge = document.getElementById("userBadge");
+  const loginBtn = document.getElementById("authBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-    document.getElementById("loginBtn").classList.add("hidden");
-    document.getElementById("logoutBtn").classList.remove("hidden");
+  if(token){
+    badge.classList.remove("hidden");
+    badge.textContent = "Logged In";
+
+    loginBtn.classList.add("hidden");
+    logoutBtn.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+    loginBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
   }
 }
 
 function logout(){
   localStorage.removeItem("token");
-  location.reload();
+  currentUser = null;
+  updateUI();
 }
 
-// ================= LOGIN =================
+// AUTH
+function toggleAuth(show){
+  document.getElementById("authModal").classList.toggle("hidden", !show);
+}
+
+async function register(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  await fetch("https://bidup-phlw.onrender.com/register", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ name: email.split("@")[0], email, password })
+  });
+
+  alert("Registered. Now login.");
+}
+
 async function login(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -240,48 +288,26 @@ async function login(){
 
   if(data.token){
     localStorage.setItem("token", data.token);
+    currentUser = data.user;
     toggleAuth(false);
     updateUI();
   }
 }
 
-// ================= AUCTIONS =================
-function createCarCard(car){
-  const div = document.createElement("div");
-  div.className = "bg-white p-4 rounded-2xl shadow";
-  div.dataset.carId = car.carId;
-
-  div.innerHTML = `
-    <h4 class="font-bold">${car.title}</h4>
-    <p class="text-sm text-slate-500">${car.year || ""}</p>
-
-    <p class="text-xl font-black current" data-price="${car.currentPrice}">
-      $${car.currentPrice}
-    </p>
-
-    <p class="text-sm text-red-500 countdown" data-time="900">15:00</p>
-
-    <p class="text-xs text-slate-500 bidder">Highest Bidder: -</p>
-
-    <button onclick="bid(this)" class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl">
-      Place Bid
-    </button>
-  `;
-  return div;
-}
-
-// ================= BID =================
+// BID
 function bid(btn){
+  const card = btn.closest("[data-car-id]");
+  const priceEl = card.querySelector(".current");
+
+  let price = parseInt(priceEl.dataset.price);
+  price += 100;
+
   const token = localStorage.getItem("token");
+
   if(!token){
     toggleAuth(true);
     return;
   }
-
-  const card = btn.closest("[data-car-id]");
-  const priceEl = card.querySelector(".current");
-
-  let price = parseInt(priceEl.dataset.price) + 100;
 
   socket.emit("placeBid", {
     carId: card.dataset.carId,
@@ -290,24 +316,52 @@ function bid(btn){
   });
 }
 
-// ================= SOCKET =================
-socket.on("initAuctions", (data)=>{
-  const grid = document.getElementById("auctionGrid");
-  grid.innerHTML = "";
-  data.forEach(a => grid.appendChild(createCarCard(a)));
-});
+// INIT
+updateUI();
 
-socket.on("bidUpdate", (data)=>{
+socket.on("bidUpdate", (data) => {
   const card = document.querySelector(`[data-car-id="${data.carId}"]`);
   if(!card) return;
 
-  card.querySelector(".current").innerText = "$" + data.amount;
-  card.querySelector(".bidder").innerText = "Highest Bidder: " + data.user;
+  const priceEl = card.querySelector(".current");
+  const bidder = card.querySelector(".bidder");
+
+  priceEl.dataset.price = data.amount;
+  priceEl.textContent = "$" + data.amount.toLocaleString();
+
+  if(bidder){
+    bidder.textContent = "Highest Bidder: " + data.user;
+  }
 });
 
-// ================= INIT =================
-updateUI();
+function toggleMenu(){
+  document.getElementById('menu').classList.toggle('hidden');
+}
+
+setInterval(()=>{
+  document.querySelectorAll('.countdown').forEach(el=>{
+    let t = parseInt(el.dataset.time);
+    if(t > 0){
+      t--;
+      el.dataset.time = t;
+      el.textContent = `${Math.floor(t/60)}:${(t%60).toString().padStart(2,'0')}`;
+    }
+  });
+},1000);
+
+socket.on("initAuctions", (auctions)=>{
+  const grid = document.getElementById("auctionGrid");
+  grid.innerHTML = "";
+  auctions.forEach(car=>{
+    grid.appendChild(createCarCard(car));
+  });
+});
 </script>
+
+<!-- WHATSAPP BUTTON -->
+<a href="https://wa.me/263XXXXXXXXX"
+class="fixed bottom-5 right-5 bg-green-500 text-white p-4 rounded-full shadow-lg z-50">
+</a>
 
 </body>
 </html>
