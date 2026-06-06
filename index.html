@@ -329,6 +329,16 @@ setInterval(()=>{
     }
   });
 },1000);
+
+  socket.on("initAuctions", (auctions) => {
+  const grid = document.getElementById("auctionGrid");
+  grid.innerHTML = "";
+
+  auctions.forEach(car => {
+    grid.appendChild(createCarCard(car));
+  });
+});
+  
 </script>
 
   <!-- WHATSAPP FLOAT BUTTON -->
