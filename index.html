@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BidUp MVP - Zimbabwe Vehicle Auctions</title>
+<title>BidUp - Zimbabwe Vehicle Auctions</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,24 +24,32 @@ body{
 <!-- HEADER -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b">
   <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
-    <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
+
+    <div>
+      <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
+      <span class="text-xs font-bold tracking-widest text-green-800">BID. WIN. DRIVE.</span>
+    </div>
+
   </div>
 </header>
 
-<!-- HERO -->
+<!-- HERO (RESTORED) -->
 <section class="pt-28 bg-gradient-to-br from-[#0a7c5a] to-emerald-700 text-white">
   <div class="max-w-7xl mx-auto px-6 py-20">
+
     <h2 class="text-4xl md:text-6xl font-black">
-      Zimbabwe Vehicle Auctions
+      Zimbabwe’s Trusted<br>Vehicle Auction Marketplace
     </h2>
-    <p class="mt-4 text-lg">
-      Live bidding marketplace
+
+    <p class="mt-4 text-lg text-white/90 max-w-xl">
+      Buy and sell verified vehicles through real-time auctions.
     </p>
+
   </div>
 </section>
 
-<!-- LIVE AUCTIONS -->
-<section id="live" class="max-w-7xl mx-auto px-6 py-16">
+<!-- LIVE AUCTIONS (DYNAMIC) -->
+<section class="max-w-7xl mx-auto px-6 py-16">
 
   <h3 class="text-3xl font-bold mb-6">Live Auctions</h3>
 
@@ -49,15 +57,16 @@ body{
 
 </section>
 
-<!-- SELL VEHICLE -->
+<!-- SELL VEHICLE (RESTORED + WORKING) -->
 <section class="bg-slate-50 py-16">
+
   <div class="max-w-4xl mx-auto px-6">
 
     <h3 class="text-3xl font-bold mb-6">Sell Your Vehicle</h3>
 
     <form id="sellForm" class="space-y-3 bg-white p-6 rounded-2xl shadow">
 
-      <input id="carId" class="w-full border p-3 rounded-xl" placeholder="Car ID (unique e.g. aqua_01)" required>
+      <input id="carId" class="w-full border p-3 rounded-xl" placeholder="Unique Car ID" required>
 
       <input id="title" class="w-full border p-3 rounded-xl" placeholder="Make & Model" required>
 
@@ -70,7 +79,48 @@ body{
     </form>
 
   </div>
+
 </section>
+
+<!-- MEMBERSHIPS (RESTORED) -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+
+  <h3 class="text-3xl font-bold mb-6">Memberships</h3>
+
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h4 class="font-bold">Free</h4>
+      <p class="text-sm text-slate-500">Basic bidding access</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow border-2 border-[var(--brand)]">
+      <h4 class="font-bold">Pro</h4>
+      <p class="text-sm text-slate-500">Unlimited bidding + alerts</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow">
+      <h4 class="font-bold">Dealer</h4>
+      <p class="text-sm text-slate-500">Bulk listings & analytics</p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER (RESTORED) -->
+<footer class="bg-slate-900 text-white p-10">
+
+  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
+
+    <div>
+      <h3 class="font-bold text-lg">BidUp</h3>
+      <p>Zimbabwe’s Trusted Vehicle Auction Marketplace</p>
+    </div>
+
+  </div>
+
+</footer>
 
 <!-- SOCKET.IO -->
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -78,125 +128,84 @@ body{
 <script>
 const socket = io("https://bidup-phlw.onrender.com");
 
-// =====================
-// STATE
-// =====================
 let auctions = {};
 
-// =====================
-// LOAD INITIAL AUCTIONS
-// =====================
+// INIT
 socket.on("initAuctions", (data) => {
   auctions = {};
-
-  data.forEach(a => {
-    auctions[a.carId] = a;
-  });
-
-  renderAuctions();
+  data.forEach(a => auctions[a.carId] = a);
+  render();
 });
 
-// =====================
-// NEW AUCTION ARRIVES
-// =====================
-socket.on("newAuction", (auction) => {
-  auctions[auction.carId] = auction;
-  renderAuctions();
+// NEW AUCTION
+socket.on("newAuction", (a) => {
+  auctions[a.carId] = a;
+  render();
 });
 
-// =====================
-// BID UPDATES
-// =====================
+// BID UPDATE
 socket.on("bidUpdate", (data) => {
-  const card = document.querySelector(`[data-car-id="${data.carId}"]`);
-  if (!card) return;
-
-  const priceEl = card.querySelector(".price");
-  priceEl.textContent = "$" + data.amount;
+  const el = document.querySelector(`[data-car-id="${data.carId}"] .price`);
+  if (el) el.textContent = "$" + data.amount;
 
   if (auctions[data.carId]) {
     auctions[data.carId].currentPrice = data.amount;
   }
 });
 
-// =====================
-// RENDER AUCTIONS
-// =====================
-function renderAuctions() {
+// RENDER
+function render() {
   const container = document.getElementById("auctionContainer");
   container.innerHTML = "";
 
   Object.values(auctions).forEach(a => {
-
     container.innerHTML += `
-      <div class="bg-white rounded-2xl shadow p-4" data-car-id="${a.carId}">
-
+      <div class="bg-white p-4 rounded-2xl shadow" data-car-id="${a.carId}">
         <h4 class="font-bold text-lg">${a.title}</h4>
-
         <p class="text-sm text-slate-500">${a.carId}</p>
 
-        <p class="text-2xl font-black mt-2 price">
-          $${a.currentPrice}
-        </p>
+        <p class="text-2xl font-black mt-2 price">$${a.currentPrice}</p>
 
         <input class="border p-2 w-full mt-3 bidInput" placeholder="Enter bid">
 
-        <button onclick="placeBid('${a.carId}', this)"
+        <button onclick="bid('${a.carId}', this)"
           class="mt-2 w-full bg-green-600 text-white py-2 rounded-xl">
           Place Bid
         </button>
-
       </div>
     `;
   });
 }
 
-// =====================
-// PLACE BID
-// =====================
-function placeBid(carId, btn) {
+// BID
+function bid(carId, btn){
   const card = btn.parentElement;
-  const input = card.querySelector(".bidInput");
-
-  const amount = Number(input.value);
-
-  if (!amount || amount <= 0) return;
+  const amount = Number(card.querySelector(".bidInput").value);
 
   socket.emit("placeBid", {
     carId,
     amount,
-    user: "Guest"
+    token: localStorage.getItem("token") || ""
   });
-
-  input.value = "";
 }
 
-// =====================
-// SELL VEHICLE FORM
-// =====================
+// SELL
 document.getElementById("sellForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const carId = document.getElementById("carId").value;
-  const title = document.getElementById("title").value;
-  const startingPrice = document.getElementById("price").value;
-
   await fetch("https://bidup-phlw.onrender.com/create-auction", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
-      carId,
-      title,
-      startingPrice: Number(startingPrice)
+      carId: carId.value,
+      title: title.value,
+      startingPrice: Number(price.value)
     })
   });
 
-  alert("Auction created!");
+  alert("Auction created");
   e.target.reset();
 });
-
 </script>
 
 </body>
