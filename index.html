@@ -223,6 +223,10 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 // --------------------
 const socket = io("https://bidup-phlw.onrender.com");
 
+socket.on("bidHistory", (history) => {
+  console.log("Past bids:", history);
+});
+
 // --------------------
 // TOAST NOTIFICATION
 // --------------------
