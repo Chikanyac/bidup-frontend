@@ -124,6 +124,21 @@ async function createAuction() {
   alert("Auction created successfully!");
   load();
 }
+  const socket = io("https://bidup-phlw.onrender.com");
+
+socket.on("bidUpdate", (data) => {
+  load(); // simple refresh (upgrade later to partial update)
+});
+
+socket.on("auctionApproved", (auction) => {
+  alert("Auction approved: " + auction.title);
+  load();
+});
+
+socket.on("auctionClosed", (auction) => {
+  alert("Auction closed: " + auction.title);
+  load();
+});
 
 // =====================
 // LOGOUT
