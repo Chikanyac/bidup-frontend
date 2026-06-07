@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seller Dashboard - BidUp</title>
+<title>Seller Dashboard - BidUp V5</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
 </head>
 
 <body class="bg-slate-100">
 
-<header class="bg-white p-4 shadow flex justify-between">
+<header class="bg-white p-4 shadow flex justify-between items-center">
   <h1 class="font-bold text-green-700 text-xl">Seller Dashboard</h1>
   <button onclick="logout()" class="text-red-500 font-bold">Logout</button>
 </header>
@@ -21,9 +20,15 @@
 
   <!-- STATS -->
   <div class="grid md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-white p-4 rounded-xl">Total Auctions: <span id="total">0</span></div>
-    <div class="bg-white p-4 rounded-xl">Active: <span id="active">0</span></div>
-    <div class="bg-white p-4 rounded-xl">Closed: <span id="closed">0</span></div>
+    <div class="bg-white p-4 rounded-xl">
+      Total Auctions: <span id="total">0</span>
+    </div>
+    <div class="bg-white p-4 rounded-xl">
+      Active: <span id="active">0</span>
+    </div>
+    <div class="bg-white p-4 rounded-xl">
+      Closed: <span id="closed">0</span>
+    </div>
   </div>
 
   <!-- CREATE AUCTION -->
@@ -32,10 +37,12 @@
 
     <input id="title" class="w-full border p-2 mb-2" placeholder="Title">
     <input id="price" class="w-full border p-2 mb-2" placeholder="Starting Price">
-    <input id="image" class="w-full border p-2 mb-2" placeholder="Image URL">
+
+    <!-- FIXED: FILE UPLOAD -->
+    <input id="image" type="file" accept="image/*" class="w-full border p-2 mb-2">
 
     <button onclick="createAuction()" class="bg-green-600 text-white px-4 py-2 rounded">
-      Create
+      Create Auction
     </button>
   </div>
 
@@ -47,15 +54,19 @@
 <script>
 const token = localStorage.getItem("token");
 
-if(!token){
+if (!token) {
   alert("Login required");
   window.location.href = "/";
 }
 
-// LOAD DATA
-async function load(){
+// =====================
+// LOAD SELLER DATA
+// =====================
+async function load() {
   const res = await fetch("https://bidup-phlw.onrender.com/api/seller/auctions", {
-    headers: { Authorization: "Bearer " + token }
+    headers: {
+      Authorization: "Bearer " + token
+    }
   });
 
   const data = await res.json();
@@ -65,8 +76,8 @@ async function load(){
   let active = 0;
   let closed = 0;
 
-  data.forEach(a=>{
-    if(a.status === "live") active++;
+  data.forEach(a => {
+    if (a.status === "live") active++;
     else closed++;
 
     const div = document.createElement("div");
@@ -74,8 +85,8 @@ async function load(){
 
     div.innerHTML = `
       <h3 class="font-bold">${a.title}</h3>
-      <p>$${a.currentPrice}</p>
-      <p>Status: ${a.status}</p>
+      <p class="text-sm">Current: $${a.currentPrice}</p>
+      <p class="text-xs text-gray-500">Status: ${a.status}</p>
     `;
 
     document.getElementById("list").appendChild(div);
@@ -86,29 +97,43 @@ async function load(){
   document.getElementById("closed").textContent = closed;
 }
 
-async function createAuction(){
-  await fetch("https://bidup-phlw.onrender.com/api/auctions/create", {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:"Bearer " + token
+// =====================
+// CREATE AUCTION (FIXED V5)
+// =====================
+async function createAuction() {
+  const form = new FormData();
+
+  form.append("carId", Date.now().toString());
+  form.append("title", document.getElementById("title").value);
+  form.append("startingPrice", document.getElementById("price").value);
+
+  const file = document.getElementById("image").files[0];
+  form.append("image", file);
+
+  const res = await fetch("https://bidup-phlw.onrender.com/api/auctions/create", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token
     },
-    body: JSON.stringify({
-      carId: Date.now().toString(),
-      title: title.value,
-      startingPrice: Number(price.value),
-      image: image.value
-    })
+    body: form
   });
 
+  const data = await res.json();
+  console.log("Auction created:", data);
+
+  alert("Auction created successfully!");
   load();
 }
 
-function logout(){
+// =====================
+// LOGOUT
+// =====================
+function logout() {
   localStorage.clear();
   window.location.href = "/";
 }
 
+// INITIAL LOAD
 load();
 </script>
 
