@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Dashboard - BidUp</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+</head>
+
+<body class="bg-slate-100">
+
+<header class="bg-white p-4 shadow flex justify-between">
+  <h1 class="font-bold text-green-700 text-xl">Seller Dashboard</h1>
+  <button onclick="logout()" class="text-red-500 font-bold">Logout</button>
+</header>
+
+<div class="max-w-6xl mx-auto p-6">
+
+  <!-- STATS -->
+  <div class="grid md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-xl">Total Auctions: <span id="total">0</span></div>
+    <div class="bg-white p-4 rounded-xl">Active: <span id="active">0</span></div>
+    <div class="bg-white p-4 rounded-xl">Closed: <span id="closed">0</span></div>
+  </div>
+
+  <!-- CREATE AUCTION -->
+  <div class="bg-white p-4 rounded-xl mb-6">
+    <h2 class="font-bold mb-3">Create Auction</h2>
+
+    <input id="title" class="w-full border p-2 mb-2" placeholder="Title">
+    <input id="price" class="w-full border p-2 mb-2" placeholder="Starting Price">
+    <input id="image" class="w-full border p-2 mb-2" placeholder="Image URL">
+
+    <button onclick="createAuction()" class="bg-green-600 text-white px-4 py-2 rounded">
+      Create
+    </button>
+  </div>
+
+  <!-- AUCTIONS LIST -->
+  <div id="list" class="grid md:grid-cols-3 gap-4"></div>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+
+if(!token){
+  alert("Login required");
+  window.location.href = "/";
+}
+
+// LOAD DATA
+async function load(){
+  const res = await fetch("https://bidup-phlw.onrender.com/api/seller/auctions", {
+    headers: { Authorization: "Bearer " + token }
+  });
+
+  const data = await res.json();
+
+  document.getElementById("list").innerHTML = "";
+
+  let active = 0;
+  let closed = 0;
+
+  data.forEach(a=>{
+    if(a.status === "live") active++;
+    else closed++;
+
+    const div = document.createElement("div");
+    div.className = "bg-white p-3 rounded-xl shadow";
+
+    div.innerHTML = `
+      <h3 class="font-bold">${a.title}</h3>
+      <p>$${a.currentPrice}</p>
+      <p>Status: ${a.status}</p>
+    `;
+
+    document.getElementById("list").appendChild(div);
+  });
+
+  document.getElementById("total").textContent = data.length;
+  document.getElementById("active").textContent = active;
+  document.getElementById("closed").textContent = closed;
+}
+
+async function createAuction(){
+  await fetch("https://bidup-phlw.onrender.com/api/auctions/create", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:"Bearer " + token
+    },
+    body: JSON.stringify({
+      carId: Date.now().toString(),
+      title: title.value,
+      startingPrice: Number(price.value),
+      image: image.value
+    })
+  });
+
+  load();
+}
+
+function logout(){
+  localStorage.clear();
+  window.location.href = "/";
+}
+
+load();
+</script>
+
+</body>
+</html>
