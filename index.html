@@ -71,7 +71,17 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   <h3 class="text-2xl font-bold mb-6">Live Auctions</h3>
   <div id="auctionGrid" class="grid md:grid-cols-3 gap-6"></div>
 </section>
+  
+<!-- DASHBOARD PANEL (HIDDEN INITIALLY) -->
+<div id="dashboardPanel" class="hidden max-w-7xl mx-auto px-6 py-10">
 
+  <h2 class="text-2xl font-bold mb-4">My Dashboard</h2>
+
+  <div id="dashboardContent" class="grid md:grid-cols-3 gap-4">
+    <!-- injected dynamically -->
+  </div>
+
+</div>
 <!-- CREATE AUCTION -->
 <section id="tab-create" class="hidden max-w-2xl mx-auto px-6 py-12">
   <h3 class="text-2xl font-bold mb-6">Create Auction</h3>
@@ -85,6 +95,19 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </button>
 </section>
 
+  <div id="sellerPanel" class="hidden max-w-7xl mx-auto px-6 py-10">
+
+  <h2 class="text-2xl font-bold mb-4">Create Auction</h2>
+
+  <input id="carTitle" class="border p-2 w-full mb-2" placeholder="Car Title">
+  <input id="carPrice" class="border p-2 w-full mb-2" placeholder="Starting Price">
+  <input id="carImage" class="border p-2 w-full mb-2" placeholder="Image URL">
+
+  <button onclick="createAuction()" class="bg-green-600 text-white px-4 py-2 rounded-xl">
+    Create Auction
+  </button>
+
+</div>
 <!-- DASHBOARD -->
 <section id="tab-dashboard" class="hidden max-w-7xl mx-auto px-6 py-12">
   <h3 class="text-2xl font-bold mb-6">User Dashboard</h3>
@@ -198,7 +221,31 @@ function updateUI(){
     logoutBtn.classList.add("hidden");
   }
 }
+async function createAuction(){
+  const token = localStorage.getItem("token");
 
+  const res = await fetch("https://api.bidup.co.zw/api/auctions/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      title: document.getElementById("carTitle").value,
+      startingPrice: document.getElementById("carPrice").value,
+      image: document.getElementById("carImage").value
+    })
+  });
+
+  const data = await res.json();
+
+  if(res.ok){
+    alert("Auction created!");
+    socket.emit("getLiveAuctions");
+  } else {
+    alert(data.error || "Failed to create auction");
+  }
+}
 /* ===================== TABS ===================== */
 function showTab(tab){
   document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
@@ -309,6 +356,14 @@ function bid(btn){
 
 /* INIT */
 updateUI();
+  function toggleDashboard(){
+  document.getElementById("dashboardPanel").classList.toggle("hidden");
+}
+
+function toggleSellerPanel(){
+  document.getElementById("sellerPanel").classList.toggle("hidden");
+}
+  
 </script>
 
 </body>
