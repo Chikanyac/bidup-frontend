@@ -143,35 +143,28 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 </a>
 
 <script>
-const API_URL = "https://api.bidup.co.zw";
-
-/* =====================
-   SOCKET CONNECTION
-===================== */
-const socket = io(API_URL, {
+const socket = io("https://api.bidup.co.zw", {
   transports: ["websocket"],
+  withCredentials: true,
   reconnection: true,
-  reconnectionAttempts: 20,
-  reconnectionDelay: 2000
+  reconnectionAttempts: 10,
+  timeout: 20000
 });
 
 let currentUser = JSON.parse(localStorage.getItem("user")) || null;
 
 /* =====================
-   SOCKET DEBUG
+   DEBUG SOCKET
 ===================== */
 socket.on("connect", () => {
   console.log("✅ SOCKET CONNECTED:", socket.id);
 
-  socket.emit("getAuctions");
+  socket.emit("pingTest", "frontend alive");
+  socket.emit("getLiveAuctions");
 });
 
-socket.on("disconnect", (reason) => {
-  console.log("❌ SOCKET DISCONNECTED:", reason);
-});
-
-socket.on("connect_error", (err) => {
-  console.error("❌ SOCKET ERROR:", err.message);
+socket.on("pongTest", (msg) => {
+  console.log("📡 BACKEND:", msg);
 });
 
 socket.onAny((event, data) => {
@@ -181,15 +174,180 @@ socket.onAny((event, data) => {
 /* =====================
    UI
 ===================== */
-function updateUI(){
+function updateUI() {
   const badge = document.getElementById("userBadge");
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  if(currentUser){
+  if (currentUser) {
     badge.classList.remove("hidden");
     loginBtn.classList.add("hidden");
-    logoutBtn.classList.remove
+    logoutBtn.classList.remove("hidden");
+    badge.textContent = "👤 " + currentUser.name;
+  } else {
+    badge.classList.add("hidden");
+    loginBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+  }
+}
+
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  currentUser = null;
+  updateUI();
+}
+
+function toggleAuth(show) {
+  document.getElementById("authModal").classList.toggle("hidden", !show);
+}
+
+/* =====================
+   AUTH
+===================== */
+async function register() {
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
+
+  const res = await fetch("https://api.bidup.co.zw/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: emailVal.split("@")[0],
+      email: emailVal,
+      password: passwordVal
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Registration failed");
+    return;
+  }
+
+  alert("Registered. Please login.");
+}
+
+async function login() {
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
+
+  const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: emailVal,
+      password: passwordVal
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Login failed");
+    return;
+  }
+
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    currentUser = data.user;
+    toggleAuth(false);
+    updateUI();
+  }
+}
+
+/* =====================
+   AUCTIONS
+===================== */
+function createCarCard(car) {
+  const div = document.createElement("div");
+  div.className = "bg-white p-4 rounded-2xl shadow";
+  div.dataset.carId = car._id;
+
+  div.innerHTML = `
+    <img src="${car.image || ''}" class="rounded-xl mb-3 h-40 w-full object-cover">
+
+    <h3 class="font-bold text-lg">${car.title}</h3>
+
+    <p class="text-sm text-slate-500">Status: ${car.status}</p>
+
+    <p class="text-xl font-bold text-green-700 current"
+       data-price="${car.currentPrice}">
+      $${car.currentPrice}
+    </p>
+
+    <button onclick="bid(this)"
+      class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl font-bold">
+      Place Bid
+    </button>
+  `;
+
+  socket.emit("joinAuction", car._id);
+
+  return div;
+}
+
+/* =====================
+   BIDDING
+===================== */
+function bid(btn) {
+  if (!currentUser) {
+    toggleAuth(true);
+    return;
+  }
+
+  const card = btn.closest("[data-car-id]");
+  const priceEl = card.querySelector(".current");
+  const price = parseInt(priceEl.dataset.price, 10) + 100;
+
+  socket.emit("placeBid", {
+    auctionId: card.dataset.carId,
+    bidAmount: price,
+    userId: currentUser._id
+  });
+}
+
+/* =====================
+   SOCKET EVENTS
+===================== */
+socket.on("initAuctions", (auctions) => {
+  console.log("📦 AUCTIONS RECEIVED:", auctions);
+
+  const grid = document.getElementById("auctionGrid");
+  grid.innerHTML = "";
+
+  if (!auctions || auctions.length === 0) {
+    grid.innerHTML = `<div class="text-slate-500">No live auctions available.</div>`;
+    return;
+  }
+
+  auctions.forEach((a) => grid.appendChild(createCarCard(a)));
+});
+
+socket.on("bidUpdated", (data) => {
+  const card = document.querySelector(`[data-car-id="${data.auctionId}"]`);
+  if (!card) return;
+
+  const priceEl = card.querySelector(".current");
+  priceEl.dataset.price = data.currentPrice;
+  priceEl.textContent = "$" + Number(data.currentPrice).toLocaleString();
+});
+
+socket.on("auctionEnded", (data) => {
+  const card = document.querySelector(`[data-car-id="${data.auctionId}"]`);
+  if (!card) return;
+
+  card.innerHTML += `
+    <div class="mt-3 p-2 bg-red-100 text-red-700 rounded-xl font-bold">
+      Auction Closed
+    </div>
+  `;
+});
+
+/* INIT */
+updateUI();
+</script>
 
 </body>
 </html>
