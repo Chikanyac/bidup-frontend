@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BidUp - Dashboard</title>
+<title>BidUp V2 - Marketplace</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -14,42 +14,32 @@
 :root{
   --brand:#0a7c5a;
 }
-body{font-family:Outfit,sans-serif;background:#f8fafc;}
-.view{display:none;}
-.view.active{display:block;}
+body{font-family:Outfit, sans-serif; background:#f8fafc;}
+.glass{backdrop-filter:blur(14px);}
 </style>
 </head>
 
 <body class="text-slate-800">
 
-<!-- =====================
-TOP NAVIGATION
-===================== -->
-<header class="fixed top-0 left-0 right-0 z-50 bg-white border-b">
-  <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
+  <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
 
-    <h1 class="text-2xl font-black text-green-700">BidUp</h1>
-
-    <!-- NAV TABS -->
-    <div class="flex gap-3 text-sm font-bold">
-
-      <button onclick="switchView('auctions')" class="tab">Live Auctions</button>
-      <button onclick="switchView('dashboard')" class="tab">Dashboard</button>
-      <button onclick="switchView('sell')" class="tab">Sell Vehicle</button>
-      <button id="adminTab" onclick="switchView('admin')" class="hidden tab text-red-600">
-        Admin
-      </button>
-
+    <div>
+      <h1 class="text-2xl font-black text-[var(--brand)]">BidUp V2</h1>
+      <span class="text-xs font-bold text-green-700">Marketplace Dashboard</span>
     </div>
 
-    <div class="flex gap-2 items-center">
-      <div id="userBadge"></div>
+    <div class="flex items-center gap-3">
+      <div id="userBadge" class="hidden font-bold text-green-700"></div>
 
-      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-3 py-1 rounded">
+      <button id="loginBtn" onclick="toggleAuth(true)"
+        class="bg-[var(--brand)] text-white px-4 py-2 rounded-xl text-sm font-bold">
         Login
       </button>
 
-      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-3 py-1 rounded">
+      <button id="logoutBtn" onclick="logout()"
+        class="hidden bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold">
         Logout
       </button>
     </div>
@@ -57,131 +47,222 @@ TOP NAVIGATION
   </div>
 </header>
 
-<!-- =====================
-VIEWS CONTAINER
-===================== -->
-<div class="pt-24 max-w-7xl mx-auto p-6">
-
-<!-- LIVE AUCTIONS -->
-<div id="auctions" class="view active">
-  <h2 class="text-2xl font-bold mb-4">Live Auctions</h2>
-  <div id="auctionGrid" class="grid md:grid-cols-3 gap-4"></div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="view">
-  <h2 class="text-2xl font-bold mb-4">My Dashboard</h2>
-  <div id="userDashboard" class="bg-white p-4 rounded shadow">
-    Loading user data...
+<!-- HERO -->
+<section class="pt-28 bg-gradient-to-br from-[#0a7c5a] to-emerald-700 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <h2 class="text-4xl md:text-5xl font-black">
+      Live Vehicle Auctions
+    </h2>
   </div>
-</div>
+</section>
 
-<!-- SELLER -->
-<div id="sell" class="view">
-  <h2 class="text-2xl font-bold mb-4">Sell Vehicle</h2>
+<!-- AUCTION DASHBOARD -->
+<section class="max-w-7xl mx-auto px-6 py-10">
 
-  <div class="bg-white p-4 rounded shadow max-w-md">
-    <input id="sellTitle" class="w-full border p-2 mb-2" placeholder="Title">
-    <input id="sellPrice" class="w-full border p-2 mb-2" placeholder="Starting Price">
-    <input id="sellImage" class="w-full border p-2 mb-2" placeholder="Image URL">
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="text-2xl font-bold">Live Auctions</h3>
+
+    <!-- CREATE AUCTION BUTTON (ADMIN/Seller ready) -->
+    <button onclick="openCreateAuction()"
+      class="bg-green-600 text-white px-4 py-2 rounded-xl font-bold">
+      + Create Auction
+    </button>
+  </div>
+
+  <div id="auctionGrid" class="grid md:grid-cols-3 gap-6">
+    <div class="text-slate-500">Loading auctions...</div>
+  </div>
+</section>
+
+<!-- CREATE AUCTION MODAL -->
+<div id="createModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-2xl w-full max-w-md">
+
+    <h2 class="text-xl font-bold mb-4">Create Auction</h2>
+
+    <input id="title" class="w-full border p-2 rounded mb-2" placeholder="Car title">
+    <input id="image" class="w-full border p-2 rounded mb-2" placeholder="Image URL">
+    <input id="price" type="number" class="w-full border p-2 rounded mb-2" placeholder="Starting price">
+    <input id="duration" type="number" class="w-full border p-2 rounded mb-2" placeholder="Duration (mins)">
 
     <button onclick="createAuction()"
-      class="bg-green-600 text-white w-full py-2 rounded">
-      Create Auction
+      class="w-full bg-green-600 text-white py-2 rounded-xl font-bold">
+      Create
     </button>
-  </div>
-</div>
 
-<!-- ADMIN -->
-<div id="admin" class="view">
-  <h2 class="text-2xl font-bold mb-4 text-red-600">Admin Panel</h2>
-
-  <div class="bg-white p-4 rounded shadow max-w-md">
-    <p class="mb-3 font-bold">Create Auction (Admin)</p>
-
-    <input id="aTitle" class="w-full border p-2 mb-2" placeholder="Title">
-    <input id="aPrice" class="w-full border p-2 mb-2" placeholder="Price">
-    <input id="aImage" class="w-full border p-2 mb-2" placeholder="Image">
-
-    <button onclick="adminCreateAuction()"
-      class="bg-red-600 text-white w-full py-2 rounded">
-      Create Auction
+    <button onclick="toggleCreate(false)" class="mt-2 text-sm w-full">
+      Close
     </button>
-  </div>
-</div>
 
+  </div>
 </div>
 
 <!-- LOGIN MODAL -->
-<div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
+<div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
 
-  <div class="bg-white p-6 rounded w-96">
+  <div class="bg-white w-full max-w-md p-6 rounded-2xl">
 
-    <input id="email" class="w-full border p-2 mb-2" placeholder="Email">
-    <input id="password" type="password" class="w-full border p-2 mb-2" placeholder="Password">
+    <h2 class="text-xl font-bold mb-4">Login / Register</h2>
 
-    <button onclick="login()" class="bg-green-600 text-white w-full py-2 mb-2">Login</button>
-    <button onclick="register()" class="bg-black text-white w-full py-2">Register</button>
+    <input id="email" class="w-full border p-2 rounded mb-2" placeholder="Email">
+    <input id="password" type="password" class="w-full border p-2 rounded mb-2" placeholder="Password">
+
+    <button onclick="login()" class="w-full bg-green-600 text-white py-2 rounded mb-2">
+      Login
+    </button>
+
+    <button onclick="register()" class="w-full bg-slate-800 text-white py-2 rounded">
+      Register
+    </button>
 
   </div>
-
 </div>
 
 <script>
-const socket = io("https://api.bidup.co.zw");
+const socket = io("https://api.bidup.co.zw", {
+  transports: ["websocket", "polling"]
+});
 
 let currentUser = JSON.parse(localStorage.getItem("user")) || null;
 
 /* =====================
-VIEW SYSTEM (NEW CORE)
-===================== */
-function switchView(view){
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  document.getElementById(view).classList.add("active");
-}
-
-/* =====================
-SOCKET
+   SOCKET INIT
 ===================== */
 socket.on("connect", () => {
-  console.log("CONNECTED:", socket.id);
+  console.log("Connected:", socket.id);
+  socket.emit("getLiveAuctions");
 });
 
 /* =====================
-RENDER AUCTIONS
+   AUCTIONS
 ===================== */
-function renderAuctions(auctions){
+function createCarCard(car){
+  const div = document.createElement("div");
+  div.className = "bg-white p-4 rounded-xl shadow";
+  div.dataset.id = car._id;
+
+  div.innerHTML = `
+    <img src="${car.image || ''}" class="h-40 w-full object-cover rounded mb-2">
+
+    <h3 class="font-bold">${car.title}</h3>
+
+    <p class="text-green-700 font-bold current"
+       data-price="${car.currentPrice}">
+      $${car.currentPrice}
+    </p>
+
+    <div class="text-red-600 font-bold text-sm mt-1 timer"></div>
+
+    <button onclick="bid(this)"
+      class="mt-3 bg-green-600 text-white w-full py-2 rounded">
+      Place Bid
+    </button>
+  `;
+
+  socket.emit("joinAuction", car._id);
+
+  /* =====================
+     TIMER (STEP 6 & 7)
+  ====================== */
+  const timerEl = div.querySelector(".timer");
+
+  function updateTimer(){
+    const diff = new Date(car.endTime) - new Date();
+
+    if(diff <= 0){
+      timerEl.innerText = "Auction Ended";
+      return;
+    }
+
+    const mins = Math.floor(diff / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+
+    timerEl.innerText = `Ends in ${mins}m ${secs}s`;
+  }
+
+  setInterval(updateTimer, 1000);
+  updateTimer();
+
+  return div;
+}
+
+/* =====================
+   SOCKET EVENTS
+===================== */
+socket.on("initAuctions", (auctions)=>{
   const grid = document.getElementById("auctionGrid");
   grid.innerHTML = "";
 
-  auctions.forEach(a => {
-    const div = document.createElement("div");
-    div.className = "bg-white p-4 rounded shadow";
+  if(!auctions.length){
+    grid.innerHTML = "No auctions yet";
+    return;
+  }
 
-    div.innerHTML = `
-      <h3 class="font-bold">${a.title}</h3>
-      <p class="text-green-600 font-bold">$${a.currentPrice}</p>
-      <button onclick="bid('${a._id}', ${a.currentPrice})"
-        class="bg-green-600 text-white px-3 py-1 mt-2 rounded">
-        Bid
-      </button>
-    `;
+  auctions.forEach(a => grid.appendChild(createCarCard(a)));
+});
 
-    grid.appendChild(div);
+socket.on("bidUpdated", (data)=>{
+  const card = document.querySelector(`[data-id="${data.auctionId}"]`);
+  if(!card) return;
+
+  const priceEl = card.querySelector(".current");
+  priceEl.dataset.price = data.currentPrice;
+  priceEl.textContent = "$" + Number(data.currentPrice).toLocaleString();
+});
+
+/* =====================
+   BID
+===================== */
+function bid(btn){
+  if(!currentUser){
+    alert("Login required");
+    return;
+  }
+
+  const card = btn.closest("[data-id]");
+  const priceEl = card.querySelector(".current");
+
+  const newPrice = parseInt(priceEl.dataset.price) + 100;
+
+  socket.emit("placeBid", {
+    auctionId: card.dataset.id,
+    bidAmount: newPrice,
+    userId: currentUser._id
   });
 }
 
 /* =====================
-LOAD AUCTIONS
+   CREATE AUCTION
 ===================== */
-function loadAuctions(){
-  fetch("https://api.bidup.co.zw/api/auctions")
-    .then(r => r.json())
-    .then(renderAuctions);
+function openCreateAuction(){
+  document.getElementById("createModal").classList.remove("hidden");
+}
+
+function toggleCreate(state){
+  document.getElementById("createModal").classList.toggle("hidden", !state);
+}
+
+async function createAuction(){
+  const res = await fetch("https://api.bidup.co.zw/api/auctions/create", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      title: title.value,
+      image: image.value,
+      startingPrice: price.value,
+      durationMinutes: duration.value
+    })
+  });
+
+  const data = await res.json();
+
+  alert("Auction created");
+  toggleCreate(false);
+  socket.emit("getLiveAuctions");
 }
 
 /* =====================
-AUTH
+   AUTH
 ===================== */
 async function login(){
   const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
@@ -196,13 +277,9 @@ async function login(){
   const data = await res.json();
 
   if(data.token){
-    currentUser = data.user;
     localStorage.setItem("user", JSON.stringify(data.user));
-
+    currentUser = data.user;
     document.getElementById("authModal").classList.add("hidden");
-
-    updateUI();
-    loadAuctions();
   }
 }
 
@@ -219,80 +296,6 @@ async function register(){
 
   alert("Registered");
 }
-
-/* =====================
-CREATE AUCTION (SELLER)
-===================== */
-async function createAuction(){
-  await fetch("https://api.bidup.co.zw/api/auctions/create", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      title: sellTitle.value,
-      startingPrice: Number(sellPrice.value),
-      image: sellImage.value
-    })
-  });
-
-  alert("Auction created");
-  loadAuctions();
-}
-
-/* =====================
-ADMIN CREATE
-===================== */
-async function adminCreateAuction(){
-  await fetch("https://api.bidup.co.zw/api/auctions/create", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      title: aTitle.value,
-      startingPrice: Number(aPrice.value),
-      image: aImage.value
-    })
-  });
-
-  alert("Admin auction created");
-  loadAuctions();
-}
-
-/* =====================
-BID
-===================== */
-function bid(id, price){
-  socket.emit("placeBid", {
-    auctionId: id,
-    bidAmount: price + 100,
-    userId: currentUser?._id
-  });
-}
-
-/* =====================
-UI UPDATE (ROLES)
-===================== */
-function updateUI(){
-  if(!currentUser) return;
-
-  document.getElementById("userBadge").innerText = currentUser.name;
-
-  document.getElementById("logoutBtn").classList.remove("hidden");
-
-  if(currentUser.role === "admin"){
-    document.getElementById("adminTab").classList.remove("hidden");
-  }
-}
-
-/* =====================
-LOGOUT
-===================== */
-function logout(){
-  localStorage.clear();
-  location.reload();
-}
-
-/* INIT */
-updateUI();
-loadAuctions();
 </script>
 
 </body>
