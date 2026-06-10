@@ -140,7 +140,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 </div>
 
 <script>
-const socket = io("https://bidup-phlw.onrender.com");
+const socket = io("https://api.bidup.co.zw");
 
 let currentUser = JSON.parse(localStorage.getItem("user")) || null;
 
@@ -180,7 +180,7 @@ function toggleAuth(show){
 }
 
 async function register(){
-  await fetch("https://bidup-phlw.onrender.com/register", {
+  await fetch("https://api.bidup.co.zw/register", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -194,7 +194,7 @@ async function register(){
 }
 
 async function login(){
-  const res = await fetch("https://bidup-phlw.onrender.com/login", {
+  const res = await fetch("https://api.bidup.co.zw/login", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
