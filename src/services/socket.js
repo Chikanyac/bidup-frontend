@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:3000"; // change to production later
+const SOCKET_URL = "https://api.bidup.co.zw"; // change to production later
 
 let socket;
 
