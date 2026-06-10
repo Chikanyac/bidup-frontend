@@ -195,13 +195,16 @@ function toggleAuth(show){
    AUTH
 ===================== */
 async function register(){
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
+
   await fetch("https://api.bidup.co.zw/api/auth/register", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
-      name: email.value.split("@")[0],
-      email: email.value,
-      password: password.value
+      name: emailVal.split("@")[0],
+      email: emailVal,
+      password: passwordVal
     })
   });
 
