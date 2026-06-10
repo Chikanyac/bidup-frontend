@@ -195,7 +195,7 @@ function toggleAuth(show){
    AUTH
 ===================== */
 async function register(){
-  await fetch("https://api.bidup.co.zw/register", {
+  await fetch("https://api.bidup.co.zw/api/auth/register", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
@@ -209,7 +209,7 @@ async function register(){
 }
 
 async function login(){
-  const res = await fetch("https://api.bidup.co.zw/login", {
+  const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({
