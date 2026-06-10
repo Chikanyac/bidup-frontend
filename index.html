@@ -22,7 +22,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 
 <body class="text-slate-800">
 
-<!-- HEADER -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
   <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
 
@@ -33,9 +32,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       </span>
     </div>
 
-    <!-- USER AREA -->
     <div class="flex items-center gap-3">
-
       <div id="userBadge" class="hidden text-sm font-bold text-green-700"></div>
 
       <button id="loginBtn" onclick="toggleAuth(true)"
@@ -52,19 +49,14 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </div>
 </header>
 
-<!-- HERO -->
 <section class="pt-28 bg-gradient-to-br from-[#0a7c5a] to-emerald-700 text-white">
   <div class="max-w-7xl mx-auto px-6 py-20">
     <h2 class="text-4xl md:text-6xl font-black">
       Zimbabwe's Trusted<br>Vehicle Auction Marketplace
     </h2>
-    <p class="mt-4 text-lg text-white/90">
-      Buy and sell vehicles in real-time auctions.
-    </p>
   </div>
 </section>
 
-<!-- AUCTIONS -->
 <section class="max-w-7xl mx-auto px-6 py-12">
   <h3 class="text-2xl font-bold mb-6">Live Auctions</h3>
 
@@ -72,47 +64,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
     <div class="text-slate-500">Loading auctions...</div>
   </div>
 </section>
-
-<!-- FOOTER (PRESERVED) -->
-<footer class="bg-slate-900 text-white p-10 text-left">
-  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
-
-    <div>
-      <h3 class="font-bold text-lg mb-2">BidUp</h3>
-      <p>Zimbabwe's Trusted Vehicle Auction Marketplace</p>
-    </div>
-
-    <div>
-      <h4 class="font-semibold mb-2">Quick Links</h4>
-      <ul class="space-y-1 text-slate-300">
-        <li><a href="#live" class="hover:text-white">Live Auctions</a></li>
-        <li><a href="#sell" class="hover:text-white">Sell Vehicle</a></li>
-        <li><a href="#members" class="hover:text-white">Memberships</a></li>
-      </ul>
-    </div>
-
-    <div>
-      <h4 class="font-semibold mb-2">Support</h4>
-      <ul class="space-y-1 text-slate-300">
-        <li>Terms & Conditions</li>
-        <li>Privacy Policy</li>
-        <li>Help Centre</li>
-      </ul>
-    </div>
-
-    <div>
-      <h4 class="font-semibold mb-2">Contact</h4>
-      <p>Harare, Zimbabwe</p>
-      <p>support@bidup.co.zw</p>
-      <p>+263 XX XXX XXXX</p>
-    </div>
-
-  </div>
-
-  <div class="text-center mt-8 text-slate-400 text-xs">
-    © 2026 BidUp. All Rights Reserved.
-  </div>
-</footer>
 
 <!-- LOGIN MODAL -->
 <div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -144,9 +95,20 @@ const socket = io("https://api.bidup.co.zw");
 
 let currentUser = JSON.parse(localStorage.getItem("user")) || null;
 
-// =====================
-// UI STATE
-// =====================
+/* =====================
+   SOCKET CONNECTION
+===================== */
+socket.on("connect", () => {
+  console.log("✅ Connected:", socket.id);
+});
+
+socket.onAny((event, data) => {
+  console.log("📡 EVENT:", event, data);
+});
+
+/* =====================
+   UI STATE
+===================== */
 function updateUI(){
   const badge = document.getElementById("userBadge");
   const loginBtn = document.getElementById("loginBtn");
@@ -156,7 +118,6 @@ function updateUI(){
     badge.classList.remove("hidden");
     loginBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
-
     badge.textContent = "👤 " + currentUser.name;
   } else {
     badge.classList.add("hidden");
@@ -172,9 +133,9 @@ function logout(){
   updateUI();
 }
 
-// =====================
-// AUTH
-// =====================
+/* =====================
+   AUTH
+===================== */
 function toggleAuth(show){
   document.getElementById("authModal").classList.toggle("hidden", !show);
 }
@@ -216,9 +177,9 @@ async function login(){
   }
 }
 
-// =====================
-// AUCTIONS UI
-// =====================
+/* =====================
+   AUCTIONS UI
+===================== */
 function createCarCard(car){
   const div = document.createElement("div");
   div.className = "bg-white p-4 rounded-2xl shadow";
@@ -229,35 +190,28 @@ function createCarCard(car){
 
     <h3 class="font-bold text-lg">${car.title}</h3>
 
-    <p class="text-sm text-slate-500">
-      Status: ${car.status}
-    </p>
+    <p class="text-sm text-slate-500">Status: ${car.status}</p>
 
     <p class="text-xl font-bold text-green-700 current"
        data-price="${car.currentPrice}">
       $${car.currentPrice}
     </p>
 
-    <p class="text-xs text-slate-400 countdown"
-       data-time="${Math.floor((new Date(car.endsAt) - new Date())/1000)}">
-    </p>
-
     <button onclick="bid(this)"
       class="mt-3 w-full bg-[var(--brand)] text-white py-2 rounded-xl font-bold">
       Place Bid
     </button>
-
-    ${car.winner ? `<p class="text-green-600 mt-2 font-bold">
-      Winner: ${car.winner.user}
-    </p>` : ""}
   `;
+
+  /* JOIN AUCTION ROOM */
+  socket.emit("joinAuction", car._id);
 
   return div;
 }
 
-// =====================
-// BIDDING
-// =====================
+/* =====================
+   BIDDING
+===================== */
 function bid(btn){
   if(!currentUser){
     toggleAuth(true);
@@ -270,51 +224,44 @@ function bid(btn){
   let price = parseInt(priceEl.dataset.price) + 100;
 
   socket.emit("placeBid", {
-    carId: card.dataset.carId,
-    amount: price,
-    token: localStorage.getItem("token")
+    auctionId: card.dataset.carId,
+    bidAmount: price,
+    userId: currentUser._id
   });
 }
 
-// =====================
-// SOCKET EVENTS
-// =====================
+/* =====================
+   SOCKET EVENTS
+===================== */
 socket.on("initAuctions", (auctions)=>{
   const grid = document.getElementById("auctionGrid");
   grid.innerHTML = "";
   auctions.forEach(a => grid.appendChild(createCarCard(a)));
 });
 
-socket.on("bidUpdate", (data)=>{
-  const card = document.querySelector(`[data-car-id="${data.carId}"]`);
+socket.on("bidUpdated", (data)=>{
+  const card = document.querySelector(`[data-car-id="${data.auctionId}"]`);
   if(!card) return;
 
   const priceEl = card.querySelector(".current");
-  priceEl.dataset.price = data.price;
-  priceEl.textContent = "$" + data.price.toLocaleString();
+  priceEl.dataset.price = data.currentPrice;
+  priceEl.textContent = "$" + data.currentPrice.toLocaleString();
 });
 
-socket.on("auctionClosed", (data)=>{
-  const card = document.querySelector(`[data-car-id="${data.carId}"]`);
+socket.on("auctionEnded", (data)=>{
+  const card = document.querySelector(`[data-car-id="${data.auctionId}"]`);
   if(!card) return;
 
   card.innerHTML += `
     <div class="mt-3 p-2 bg-red-100 text-red-700 rounded-xl font-bold">
       Auction Closed
-      ${data.winner ? `<div>Winner: ${data.winner.user}</div>` : ""}
     </div>
   `;
 });
 
-// =====================
+/* INIT */
 updateUI();
 </script>
-
-<!-- WHATSAPP BUTTON -->
-<a href="https://wa.me/263XXXXXXXXX"
-   class="fixed bottom-5 right-5 bg-green-500 p-4 rounded-full text-white shadow-lg">
-  WA
-</a>
 
 </body>
 </html>
