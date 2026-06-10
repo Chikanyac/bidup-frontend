@@ -63,7 +63,7 @@ if (!token) {
 // LOAD SELLER DATA
 // =====================
 async function load() {
-  const res = await fetch("https://bidup-phlw.onrender.com/api/seller/auctions", {
+  const res = await fetch("https://api.bidup.co.zw/api/seller/auctions", {
     headers: {
       Authorization: "Bearer " + token
     }
@@ -110,7 +110,7 @@ async function createAuction() {
   const file = document.getElementById("image").files[0];
   form.append("image", file);
 
-  const res = await fetch("https://bidup-phlw.onrender.com/api/auctions/create", {
+  const res = await fetch("https://api.bidup.co.zw/api/auctions/create", {
     method: "POST",
     headers: {
       Authorization: "Bearer " + token
@@ -124,7 +124,7 @@ async function createAuction() {
   alert("Auction created successfully!");
   load();
 }
-  const socket = io("https://bidup-phlw.onrender.com");
+  const socket = io("https://api.bidup.co.zw");
 
 socket.on("bidUpdate", (data) => {
   load(); // simple refresh (upgrade later to partial update)
