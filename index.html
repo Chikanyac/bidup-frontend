@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidUp - Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand:#0a7c5a;
+}
+body{font-family:Outfit,sans-serif;background:#f8fafc;}
+.view{display:none;}
+.view.active{display:block;}
+</style>
+</head>
+
+<body class="text-slate-800">
+
+<!-- =====================
+TOP NAVIGATION
+===================== -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white border-b">
+  <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+
+    <h1 class="text-2xl font-black text-green-700">BidUp</h1>
+
+    <!-- NAV TABS -->
+    <div class="flex gap-3 text-sm font-bold">
+
+      <button onclick="switchView('auctions')" class="tab">Live Auctions</button>
+      <button onclick="switchView('dashboard')" class="tab">Dashboard</button>
+      <button onclick="switchView('sell')" class="tab">Sell Vehicle</button>
+      <button id="adminTab" onclick="switchView('admin')" class="hidden tab text-red-600">
+        Admin
+      </button>
+
+    </div>
+
+    <div class="flex gap-2 items-center">
+      <div id="userBadge"></div>
+
+      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-3 py-1 rounded">
+        Login
+      </button>
+
+      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-3 py-1 rounded">
+        Logout
+      </button>
+    </div>
+
+  </div>
+</header>
+
+<!-- =====================
+VIEWS CONTAINER
+===================== -->
+<div class="pt-24 max-w-7xl mx-auto p-6">
+
+<!-- LIVE AUCTIONS -->
+<div id="auctions" class="view active">
+  <h2 class="text-2xl font-bold mb-4">Live Auctions</h2>
+  <div id="auctionGrid" class="grid md:grid-cols-3 gap-4"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="view">
+  <h2 class="text-2xl font-bold mb-4">My Dashboard</h2>
+  <div id="userDashboard" class="bg-white p-4 rounded shadow">
+    Loading user data...
+  </div>
+</div>
+
+<!-- SELLER -->
+<div id="sell" class="view">
+  <h2 class="text-2xl font-bold mb-4">Sell Vehicle</h2>
+
+  <div class="bg-white p-4 rounded shadow max-w-md">
+    <input id="sellTitle" class="w-full border p-2 mb-2" placeholder="Title">
+    <input id="sellPrice" class="w-full border p-2 mb-2" placeholder="Starting Price">
+    <input id="sellImage" class="w-full border p-2 mb-2" placeholder="Image URL">
+
+    <button onclick="createAuction()"
+      class="bg-green-600 text-white w-full py-2 rounded">
+      Create Auction
+    </button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="view">
+  <h2 class="text-2xl font-bold mb-4 text-red-600">Admin Panel</h2>
+
+  <div class="bg-white p-4 rounded shadow max-w-md">
+    <p class="mb-3 font-bold">Create Auction (Admin)</p>
+
+    <input id="aTitle" class="w-full border p-2 mb-2" placeholder="Title">
+    <input id="aPrice" class="w-full border p-2 mb-2" placeholder="Price">
+    <input id="aImage" class="w-full border p-2 mb-2" placeholder="Image">
+
+    <button onclick="adminCreateAuction()"
+      class="bg-red-600 text-white w-full py-2 rounded">
+      Create Auction
+    </button>
+  </div>
+</div>
+
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
+
+  <div class="bg-white p-6 rounded w-96">
+
+    <input id="email" class="w-full border p-2 mb-2" placeholder="Email">
+    <input id="password" type="password" class="w-full border p-2 mb-2" placeholder="Password">
+
+    <button onclick="login()" class="bg-green-600 text-white w-full py-2 mb-2">Login</button>
+    <button onclick="register()" class="bg-black text-white w-full py-2">Register</button>
+
+  </div>
+
+</div>
+
+<script>
+const socket = io("https://api.bidup.co.zw");
+
+let currentUser = JSON.parse(localStorage.getItem("user")) || null;
+
+/* =====================
+VIEW SYSTEM (NEW CORE)
+===================== */
+function switchView(view){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById(view).classList.add("active");
+}
+
+/* =====================
+SOCKET
+===================== */
+socket.on("connect", () => {
+  console.log("CONNECTED:", socket.id);
+});
+
+/* =====================
+RENDER AUCTIONS
+===================== */
+function renderAuctions(auctions){
+  const grid = document.getElementById("auctionGrid");
+  grid.innerHTML = "";
+
+  auctions.forEach(a => {
+    const div = document.createElement("div");
+    div.className = "bg-white p-4 rounded shadow";
+
+    div.innerHTML = `
+      <h3 class="font-bold">${a.title}</h3>
+      <p class="text-green-600 font-bold">$${a.currentPrice}</p>
+      <button onclick="bid('${a._id}', ${a.currentPrice})"
+        class="bg-green-600 text-white px-3 py-1 mt-2 rounded">
+        Bid
+      </button>
+    `;
+
+    grid.appendChild(div);
+  });
+}
+
+/* =====================
+LOAD AUCTIONS
+===================== */
+function loadAuctions(){
+  fetch("https://api.bidup.co.zw/api/auctions")
+    .then(r => r.json())
+    .then(renderAuctions);
+}
+
+/* =====================
+AUTH
+===================== */
+async function login(){
+  const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    currentUser = data.user;
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    document.getElementById("authModal").classList.add("hidden");
+
+    updateUI();
+    loadAuctions();
+  }
+}
+
+async function register(){
+  await fetch("https://api.bidup.co.zw/api/auth/register", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      name: email.value.split("@")[0],
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  alert("Registered");
+}
+
+/* =====================
+CREATE AUCTION (SELLER)
+===================== */
+async function createAuction(){
+  await fetch("https://api.bidup.co.zw/api/auctions/create", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      title: sellTitle.value,
+      startingPrice: Number(sellPrice.value),
+      image: sellImage.value
+    })
+  });
+
+  alert("Auction created");
+  loadAuctions();
+}
+
+/* =====================
+ADMIN CREATE
+===================== */
+async function adminCreateAuction(){
+  await fetch("https://api.bidup.co.zw/api/auctions/create", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      title: aTitle.value,
+      startingPrice: Number(aPrice.value),
+      image: aImage.value
+    })
+  });
+
+  alert("Admin auction created");
+  loadAuctions();
+}
+
+/* =====================
+BID
+===================== */
+function bid(id, price){
+  socket.emit("placeBid", {
+    auctionId: id,
+    bidAmount: price + 100,
+    userId: currentUser?._id
+  });
+}
+
+/* =====================
+UI UPDATE (ROLES)
+===================== */
+function updateUI(){
+  if(!currentUser) return;
+
+  document.getElementById("userBadge").innerText = currentUser.name;
+
+  document.getElementById("logoutBtn").classList.remove("hidden");
+
+  if(currentUser.role === "admin"){
+    document.getElementById("adminTab").classList.remove("hidden");
+  }
+}
+
+/* =====================
+LOGOUT
+===================== */
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
+
+/* INIT */
+updateUI();
+loadAuctions();
+</script>
+
+</body>
+</html>
