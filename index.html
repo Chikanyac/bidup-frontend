@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BidUp V3 Marketplace</title>
+<title>BidUp Marketplace V3.1</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -14,8 +14,11 @@
 :root{
   --brand:#0a7c5a;
 }
-body{font-family:Outfit, sans-serif; background:#f8fafc;}
-.glass{backdrop-filter:blur(12px);}
+body{
+  font-family: Outfit, sans-serif;
+  background:#f8fafc;
+}
+.glass{backdrop-filter: blur(10px);}
 </style>
 </head>
 
@@ -23,7 +26,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 
 <!-- HEADER -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
-  <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
+  <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
 
     <div>
       <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
@@ -33,51 +36,113 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
     </div>
 
     <div class="flex gap-2">
-      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-4 py-2 rounded">Login</button>
-      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-4 py-2 rounded">
+        Login
+      </button>
+      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded">
+        Logout
+      </button>
     </div>
 
   </div>
 </header>
 
-<!-- NAV -->
-<div id="dashboardNav" class="hidden max-w-7xl mx-auto mt-24 px-6 flex flex-wrap gap-2">
-  <button onclick="showTab('home')" class="bg-green-600 text-white px-3 py-2 rounded">Home</button>
-  <button onclick="showTab('auctions')" class="bg-slate-800 text-white px-3 py-2 rounded">Auctions</button>
-  <button onclick="showTab('create')" class="bg-slate-700 text-white px-3 py-2 rounded">Sell Car</button>
-  <button onclick="showTab('dashboard')" class="bg-slate-600 text-white px-3 py-2 rounded">Dashboard</button>
-  <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">Rules</button>
-  <button onclick="showTab('seller')" class="bg-emerald-700 text-white px-3 py-2 rounded">Seller Checklist</button>
+<!-- NAV (PUBLIC - ALWAYS VISIBLE) -->
+<div id="dashboardNav" class="max-w-7xl mx-auto mt-24 px-6 flex flex-wrap gap-2">
+
+  <button onclick="showTab('home')" class="bg-green-600 text-white px-3 py-2 rounded">
+    Home
+  </button>
+
+  <button onclick="showTab('auctions')" class="bg-slate-800 text-white px-3 py-2 rounded">
+    Buy Cars
+  </button>
+
+  <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">
+    Rules
+  </button>
+
+  <button onclick="showTab('seller')" class="bg-emerald-700 text-white px-3 py-2 rounded">
+    Sell Car
+  </button>
+
+  <button onclick="requireLogin(() => showTab('create'))" class="bg-blue-600 text-white px-3 py-2 rounded">
+    Create Auction
+  </button>
+
+  <button onclick="requireLogin(() => showTab('dashboard'))" class="bg-slate-600 text-white px-3 py-2 rounded">
+    Dashboard
+  </button>
+
 </div>
 
 <!-- HERO -->
 <section class="pt-28 bg-gradient-to-br from-green-700 to-emerald-600 text-white">
-  <div class="max-w-7xl mx-auto px-6 py-20">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+
     <h2 class="text-4xl font-black">
       Zimbabwe's trusted online vehicle auctions
     </h2>
-    <p class="mt-3 text-lg max-w-2xl">
+
+    <p class="mt-3 max-w-3xl text-lg">
       Buy and sell vehicles under 10 years old. Every listing is verified for ZIMRA duty, ownership, and age compliance. Bid with confidence — 7-day CPA cooling-off included.
     </p>
+
   </div>
 </section>
 
-<!-- HOME TAB -->
+<!-- HOME -->
 <section id="tab-home" class="max-w-7xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold mb-4">Featured Vehicles</h3>
-
+  <h3 class="text-2xl font-bold mb-4">Featured Cars</h3>
   <div id="auctionGrid" class="grid md:grid-cols-3 gap-6"></div>
 </section>
 
-<!-- AUCTIONS -->
+<!-- BUY -->
 <section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
   <h3 class="text-2xl font-bold mb-4">Live Auctions</h3>
   <div id="auctionGrid2" class="grid md:grid-cols-3 gap-6"></div>
 </section>
 
-<!-- CREATE -->
+<!-- SELL -->
+<section id="tab-seller" class="hidden max-w-4xl mx-auto px-6 py-10">
+  <h3 class="text-2xl font-bold mb-4">Seller Onboarding</h3>
+
+  <div class="bg-white p-6 rounded shadow text-sm space-y-2">
+    <ul class="list-disc ml-5">
+      <li>ID / Passport required</li>
+      <li>Proof of residence</li>
+      <li>Vehicle registration book</li>
+      <li>12+ photos required</li>
+      <li>Vehicle must be under 10 years</li>
+    </ul>
+  </div>
+</section>
+
+<!-- RULES -->
+<section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
+  <h3 class="text-2xl font-bold mb-4">Auction Rules</h3>
+
+  <div class="bg-white p-6 rounded shadow text-sm space-y-3">
+    <ul class="list-disc ml-5">
+      <li>Timed auctions with auto-extension</li>
+      <li>Vehicles sold as-is</li>
+      <li>Payment required within 48 hours</li>
+      <li>7-day cooling-off applies where applicable</li>
+    </ul>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="tab-dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
+  <h3 class="text-2xl font-bold">Dashboard</h3>
+  <div class="bg-white p-4 mt-4 rounded shadow">
+    User dashboard (login required)
+  </div>
+</section>
+
+<!-- CREATE AUCTION -->
 <section id="tab-create" class="hidden max-w-3xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold mb-4">Sell Your Car</h3>
+  <h3 class="text-2xl font-bold mb-4">Create Auction</h3>
 
   <input id="title" class="w-full border p-2 mb-2" placeholder="Car Title">
   <input id="price" class="w-full border p-2 mb-2" placeholder="Starting Price">
@@ -88,51 +153,17 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </button>
 </section>
 
-<!-- DASHBOARD -->
-<section id="tab-dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold">Dashboard</h3>
-  <div class="bg-white p-4 mt-4 rounded shadow">Welcome to BidUp dashboard</div>
-</section>
-
-<!-- RULES -->
-<section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold mb-4">Rules of Auction</h3>
-  <div class="bg-white p-6 rounded shadow text-sm space-y-3">
-    <p><b>All vehicles must comply with Zimbabwe regulations.</b></p>
-    <ul class="list-disc ml-5">
-      <li>Vehicles under 10 years only</li>
-      <li>Timed auctions with auto-extension</li>
-      <li>Payment within 24–48 hours</li>
-      <li>7-day cooling-off may apply</li>
-    </ul>
-  </div>
-</section>
-
-<!-- SELLER CHECKLIST -->
-<section id="tab-seller" class="hidden max-w-4xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold mb-4">Seller Onboarding Checklist</h3>
-
-  <div class="bg-white p-6 rounded shadow text-sm space-y-3">
-    <ul class="list-disc ml-5">
-      <li>ID / Passport</li>
-      <li>Proof of residence</li>
-      <li>Registration book</li>
-      <li>Police clearance (CVR4)</li>
-      <li>Vehicle photos (12 minimum)</li>
-      <li>Ownership confirmation</li>
-    </ul>
-  </div>
-</section>
-
 <!-- AUTH -->
 <div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
   <div class="bg-white p-6 rounded w-80">
+
     <input id="email" class="w-full border p-2 mb-2" placeholder="Email">
     <input id="password" type="password" class="w-full border p-2 mb-2" placeholder="Password">
 
     <button onclick="login()" class="w-full bg-green-600 text-white p-2">Login</button>
     <button onclick="register()" class="w-full bg-slate-800 text-white p-2 mt-2">Register</button>
     <button onclick="toggleAuth(false)" class="w-full mt-2 text-sm">Close</button>
+
   </div>
 </div>
 
@@ -142,21 +173,21 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 
     <div>
       <h3 class="font-bold">BidUp</h3>
-      <p>Zimbabwe's trusted vehicle auction platform</p>
+      <p>Zimbabwe's trusted vehicle auction marketplace</p>
     </div>
 
     <div>
-      <h4 class="font-bold">Quick Links</h4>
-      <p>Home • Auctions • Sell • Rules</p>
+      <h3 class="font-bold">Links</h3>
+      <p>Home • Buy • Sell • Rules</p>
     </div>
 
     <div>
-      <h4 class="font-bold">Support</h4>
+      <h3 class="font-bold">Support</h3>
       <p>Help Centre • Terms • Privacy</p>
     </div>
 
     <div>
-      <h4 class="font-bold">Contact</h4>
+      <h3 class="font-bold">Contact</h3>
       <p>Harare, Zimbabwe</p>
     </div>
 
@@ -171,49 +202,87 @@ const socket = io("https://api.bidup.co.zw", {
 
 let currentUser = JSON.parse(localStorage.getItem("user"));
 
+/* NAV */
 function showTab(tab){
   document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
   document.getElementById("tab-" + tab).classList.remove("hidden");
 }
 
+/* LOGIN GATE */
+function requireLogin(action){
+  if(!currentUser){
+    toggleAuth(true);
+    return;
+  }
+  action();
+}
+
+/* AUTH UI */
 function toggleAuth(show){
   document.getElementById("authModal").classList.toggle("hidden", !show);
 }
 
 function updateUI(){
   if(currentUser){
-    document.getElementById("dashboardNav").classList.remove("hidden");
     document.getElementById("loginBtn").classList.add("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
   }
 }
 
-function renderAuction(a){
+/* AUCTIONS */
+const dummyCars = [
+  { title:"Toyota Hilux 2020", currentPrice:12000 },
+  { title:"Honda Fit 2019", currentPrice:8000 },
+  { title:"BMW X3 2018", currentPrice:18500 }
+];
+
+function renderCar(car){
   const div = document.createElement("div");
   div.className = "bg-white p-4 rounded shadow";
+
   div.innerHTML = `
-    <h3 class="font-bold">${a.title}</h3>
-    <p class="text-green-700 font-bold">$${a.currentPrice || a.startingPrice}</p>
-    <button class="bg-green-600 text-white px-3 py-1 mt-2 rounded"
-      onclick="alert('Login required to bid')">
+    <h3 class="font-bold">${car.title}</h3>
+    <p class="text-green-700 font-bold">$${car.currentPrice}</p>
+    <button onclick="bid()" class="mt-2 bg-green-600 text-white px-3 py-1 rounded">
       Bid
     </button>
   `;
   return div;
 }
 
-/* dummy cars */
-const dummy = [
-  { title:"Toyota Hilux 2020", currentPrice:12000 },
-  { title:"Honda Fit 2019", currentPrice:8500 },
-  { title:"BMW X3 2018", currentPrice:18000 }
-];
-
 window.onload = () => {
   const grid = document.getElementById("auctionGrid");
-  dummy.forEach(c => grid.appendChild(renderAuction(c)));
+  dummyCars.forEach(c => grid.appendChild(renderCar(c)));
 };
 
+/* BID */
+function bid(){
+  requireLogin(() => {
+    alert("Bid placed (demo)");
+  });
+}
+
+/* SELL */
+function submitAuction(){
+  requireLogin(() => {
+    fetch("https://api.bidup.co.zw/api/auctions/create", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + localStorage.getItem("token")
+      },
+      body: JSON.stringify({
+        title:title.value,
+        startingPrice:price.value,
+        image:image.value
+      })
+    });
+
+    alert("Submitted for approval");
+  });
+}
+
+/* AUTH */
 async function login(){
   const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
     method:"POST",
@@ -225,6 +294,7 @@ async function login(){
   });
 
   const data = await res.json();
+
   if(data.token){
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
@@ -254,23 +324,7 @@ function logout(){
   location.reload();
 }
 
-/* seller submit */
-function submitAuction(){
-  fetch("https://api.bidup.co.zw/api/auctions/create", {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer " + localStorage.getItem("token")
-    },
-    body: JSON.stringify({
-      title:title.value,
-      startingPrice:price.value,
-      image:image.value
-    })
-  });
-
-  alert("Submitted for approval");
-}
+updateUI();
 </script>
 
 </body>
