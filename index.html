@@ -50,7 +50,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </div>
 </header>
 
-<!-- DASHBOARD NAV -->
+<!-- NAV -->
 <div id="dashboardNav" class="hidden max-w-7xl mx-auto mt-24 px-6 flex gap-3">
   <button onclick="showTab('auctions')" class="bg-green-600 text-white px-4 py-2 rounded">Auctions</button>
   <button onclick="showTab('create')" class="bg-slate-800 text-white px-4 py-2 rounded">Create Auction</button>
@@ -72,15 +72,15 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   <div id="auctionGrid" class="grid md:grid-cols-3 gap-6"></div>
 </section>
 
-<!-- CREATE AUCTION -->
+<!-- CREATE -->
 <section id="tab-create" class="hidden max-w-2xl mx-auto px-6 py-12">
   <h3 class="text-2xl font-bold mb-6">Create Auction</h3>
 
-  <input id="title" class="w-full border p-3 mb-3 rounded" placeholder="Car Title">
-  <input id="price" class="w-full border p-3 mb-3 rounded" placeholder="Starting Price">
-  <input id="image" class="w-full border p-3 mb-3 rounded" placeholder="Image URL">
+  <input id="carTitle" class="w-full border p-3 mb-3 rounded" placeholder="Car Title">
+  <input id="carPrice" class="w-full border p-3 mb-3 rounded" placeholder="Starting Price">
+  <input id="carImage" class="w-full border p-3 mb-3 rounded" placeholder="Image URL">
 
-  <button onclick="createAuctionHandler()" class="bg-green-600 text-white px-4 py-2 rounded">
+  <button onclick="createAuction()" class="bg-green-600 text-white px-4 py-2 rounded">
     Create Auction
   </button>
 </section>
@@ -129,9 +129,9 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
     <div>
       <h4 class="font-semibold mb-2">Quick Links</h4>
       <ul class="space-y-1 text-slate-300">
-        <li>Live Auctions</li>
-        <li>Sell Vehicle</li>
-        <li>Dashboard</li>
+        <li><a href="#tab-auctions">Live Auctions</a></li>
+        <li><a href="#tab-create">Sell Vehicle</a></li>
+        <li><a href="#tab-dashboard">Dashboard</a></li>
       </ul>
     </div>
 
@@ -148,7 +148,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       <h4 class="font-semibold mb-2">Contact</h4>
       <p>Harare, Zimbabwe</p>
       <p>support@bidup.co.zw</p>
-      <p>+263 XX XXX XXXX</p>
     </div>
 
   </div>
@@ -158,104 +157,93 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </div>
 </footer>
 
-<!-- WHATSAPP -->
-<a href="https://wa.me/263XXXXXXXXX"
-   class="fixed bottom-5 right-5 bg-green-500 p-4 rounded-full text-white shadow-lg">
-  WA
-</a>
-
+<!-- ===================== SCRIPT ===================== -->
 <script>
 const socket = io("https://api.bidup.co.zw", {
-  transports: ["websocket", "polling"],
-  withCredentials: true
+  transports: ["websocket", "polling"]
 });
 
-let currentUser = JSON.parse(localStorage.getItem("user")) || null;
-
-/* ================= UI ================= */
-function updateUI(){
-  const nav = document.getElementById("dashboardNav");
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  if(currentUser){
-    nav.classList.remove("hidden");
-    loginBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
-  } else {
-    nav.classList.add("hidden");
-    loginBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
-  }
-}
+let currentUser = JSON.parse(localStorage.getItem("user"));
 
 /* ================= AUTH FIXED ================= */
 async function register(){
-  const emailVal = document.getElementById("email").value;
-  const passwordVal = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   const res = await fetch("https://api.bidup.co.zw/api/auth/register", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
-      name: emailVal.split("@")[0],
-      email: emailVal,
-      password: passwordVal
+      name: email.split("@")[0],
+      email,
+      password
     })
   });
 
   const data = await res.json();
-  if(!res.ok){
-    alert(data.error || "Registration failed");
-    return;
-  }
-
-  alert("Registered successfully");
+  alert(data.message || "Registered");
 }
 
 async function login(){
-  const emailVal = document.getElementById("email").value;
-  const passwordVal = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ email: emailVal, password: passwordVal })
+    body: JSON.stringify({ email, password })
   });
 
   const data = await res.json();
 
-  if(!res.ok){
+  if(data.token){
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    currentUser = data.user;
+    toggleAuth(false);
+    updateUI();
+  } else {
     alert(data.error || "Login failed");
-    return;
   }
+}
 
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("user", JSON.stringify(data.user));
+/* ================= UI ================= */
+function updateUI(){
+  const nav = document.getElementById("dashboardNav");
+  if(currentUser){
+    nav.classList.remove("hidden");
+  } else {
+    nav.classList.add("hidden");
+  }
+}
 
-  currentUser = data.user;
-  toggleAuth(false);
+function logout(){
+  localStorage.clear();
+  currentUser = null;
   updateUI();
 }
 
-/* ================= AUCTIONS ================= */
-function createAuctionHandler(){
-  const token = localStorage.getItem("token");
+/* ================= TABS ================= */
+function showTab(tab){
+  document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
+  document.getElementById("tab-" + tab).classList.remove("hidden");
+}
 
+/* ================= AUCTIONS ================= */
+function createAuction(){
   fetch("https://api.bidup.co.zw/api/auctions/create", {
     method:"POST",
     headers:{
       "Content-Type":"application/json",
-      "Authorization":"Bearer " + token
+      "Authorization":"Bearer " + localStorage.getItem("token")
     },
     body: JSON.stringify({
-      title: document.getElementById("title").value,
-      startingPrice: document.getElementById("price").value,
-      image: document.getElementById("image").value
+      title: carTitle.value,
+      startingPrice: carPrice.value,
+      image: carImage.value
     })
   });
 
-  alert("Auction created");
   socket.emit("getLiveAuctions");
 }
 
@@ -271,24 +259,35 @@ socket.on("initAuctions", (data)=>{
   data.forEach(a=>{
     const div = document.createElement("div");
     div.className = "bg-white p-4 rounded shadow";
+    div.dataset.id = a._id;
+
     div.innerHTML = `
       <h3 class="font-bold">${a.title}</h3>
-      <p class="text-green-700 font-bold">$${a.currentPrice}</p>
+      <p class="text-green-600 font-bold price">$${a.currentPrice}</p>
+      <button onclick="bid(this)">Bid</button>
     `;
+
+    socket.emit("joinAuction", a._id);
     grid.appendChild(div);
   });
 });
 
-/* ================= NAV ================= */
-function showTab(tab){
-  document.querySelectorAll("section[id^='tab']").forEach(s=>s.classList.add("hidden"));
-  document.getElementById("tab-" + tab).classList.remove("hidden");
+socket.on("bidUpdated", (data)=>{
+  const el = document.querySelector(`[data-id="${data.auctionId}"] .price`);
+  if(el) el.textContent = "$" + data.currentPrice;
+});
+
+/* ================= BID ================= */
+function bid(btn){
+  const card = btn.closest("[data-id]");
+  socket.emit("placeBid", {
+    auctionId: card.dataset.id,
+    bidAmount: Number(card.querySelector(".price").textContent.replace("$","")) + 100,
+    userId: currentUser?._id
+  });
 }
 
-function toggleAuth(show){
-  document.getElementById("authModal").classList.toggle("hidden", !show);
-}
-
+/* INIT */
 updateUI();
 </script>
 
