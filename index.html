@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BidUp V3 Marketplace</title>
+<title>BidUp Marketplace V3.1</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -11,216 +11,201 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: Outfit, sans-serif; background:#f8fafc; }
-.glass { backdrop-filter: blur(12px); }
+body { font-family: Outfit, sans-serif; background:#f6f7fb; }
+:root { --brand:#0a7c5a; }
+.card { transition:0.2s ease; }
+.card:hover { transform:translateY(-3px); }
 </style>
 </head>
 
-<body class="text-slate-800">
+<body>
 
 <!-- HEADER -->
-<header class="fixed top-0 left-0 right-0 bg-white/80 glass border-b z-50">
+<header class="bg-white shadow fixed w-full top-0 z-50">
   <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
 
     <div>
       <h1 class="text-2xl font-black text-green-700">BidUp</h1>
-      <p class="text-xs text-green-800 font-bold">BID. WIN. DRIVE.</p>
+      <p class="text-xs text-gray-500">BID. WIN. DRIVE.</p>
     </div>
 
-    <div class="flex gap-2 items-center">
-      <span id="userBadge" class="hidden text-sm font-bold text-green-700"></span>
-
-      <button id="loginBtn" class="bg-green-600 text-white px-4 py-2 rounded">Login</button>
-      <button id="logoutBtn" class="hidden bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+    <div class="flex gap-2">
+      <button onclick="showTab('buy')" class="px-3 py-2 text-sm bg-green-600 text-white rounded">Buy Cars</button>
+      <button onclick="showTab('sell')" class="px-3 py-2 text-sm bg-gray-800 text-white rounded">Sell Car</button>
+      <button onclick="toggleAuth(true)" class="px-3 py-2 text-sm bg-blue-600 text-white rounded">Login</button>
     </div>
 
   </div>
 </header>
 
-<!-- NAV -->
-<div id="nav" class="hidden max-w-7xl mx-auto mt-24 px-6 flex gap-3">
-  <button data-tab="auctions" class="tabBtn bg-green-600 text-white px-3 py-2 rounded">Live Auctions</button>
-  <button data-tab="create" class="tabBtn bg-slate-800 text-white px-3 py-2 rounded">Create Auction</button>
-  <button data-tab="dashboard" class="tabBtn bg-slate-700 text-white px-3 py-2 rounded">Dashboard</button>
-</div>
-
-<!-- HERO -->
-<section class="pt-28 bg-green-700 text-white">
-  <div class="max-w-7xl mx-auto px-6 py-16">
-    <h2 class="text-4xl font-black">Zimbabwe's Trusted
-Vehicle Auction Marketplace</h2>
-    <p class="opacity-80">Real-time bidding marketplace</p>
+<!-- FILTERS -->
+<section class="pt-24 max-w-7xl mx-auto px-4">
+  <div class="bg-white p-4 rounded shadow flex gap-3 flex-wrap">
+    <input placeholder="Make" class="border p-2 rounded">
+    <input placeholder="Model" class="border p-2 rounded">
+    <input placeholder="Max Price" class="border p-2 rounded">
+    <button class="bg-green-600 text-white px-4 rounded">Filter</button>
   </div>
 </section>
 
-<!-- AUCTIONS -->
-<section id="tab-auctions" class="tab max-w-7xl mx-auto px-6 py-10">
-  <h2 class="text-xl font-bold mb-4">Live Auctions</h2>
-  <div id="auctionGrid" class="grid md:grid-cols-3 gap-4"></div>
+<!-- BUY TAB -->
+<section id="tab-buy" class="max-w-7xl mx-auto px-4 py-6">
+  <h2 class="text-xl font-bold mb-4">Live Vehicles</h2>
+  <div id="grid" class="grid md:grid-cols-3 gap-4"></div>
 </section>
 
-<!-- CREATE -->
-<section id="tab-create" class="tab hidden max-w-2xl mx-auto px-6 py-10">
-  <h2 class="text-xl font-bold mb-4">Create Auction</h2>
+<!-- SELL TAB -->
+<section id="tab-sell" class="hidden max-w-2xl mx-auto px-4 py-6">
+  <h2 class="text-xl font-bold mb-4">Sell Your Car</h2>
 
-  <input id="title" class="w-full border p-2 mb-2" placeholder="Title">
-  <input id="price" class="w-full border p-2 mb-2" placeholder="Starting Price">
-  <input id="image" class="w-full border p-2 mb-2" placeholder="Image URL">
+  <input id="title" class="border p-2 w-full mb-2" placeholder="Car Title">
+  <input id="price" class="border p-2 w-full mb-2" placeholder="Starting Price">
+  <input id="image" class="border p-2 w-full mb-2" placeholder="Image URL">
 
-  <button id="createBtn" class="bg-green-600 text-white px-4 py-2 rounded">
-    Create Auction
+  <button onclick="submitCar()" class="bg-green-600 text-white px-4 py-2 rounded">
+    Submit for Approval
   </button>
 </section>
 
-<!-- DASHBOARD -->
-<section id="tab-dashboard" class="tab hidden max-w-7xl mx-auto px-6 py-10">
-  <h2 class="text-xl font-bold mb-4">Dashboard</h2>
-  <div class="bg-white p-4 rounded shadow">User dashboard ready</div>
-</section>
-
-<!-- AUTH MODAL -->
-<div id="authModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+<!-- LOGIN MODAL -->
+<div id="auth" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
   <div class="bg-white p-6 rounded w-96">
 
-    <h2 class="text-lg font-bold mb-3">Login</h2>
+    <h2 class="font-bold text-lg mb-3">Login</h2>
 
-    <input id="email" class="w-full border p-2 mb-2" placeholder="Email">
-    <input id="password" type="password" class="w-full border p-2 mb-3" placeholder="Password">
+    <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
+    <input id="password" class="border p-2 w-full mb-3" placeholder="Password">
 
-    <button id="loginSubmit" class="bg-green-600 text-white w-full py-2 mb-2">Login</button>
-    <button id="registerSubmit" class="bg-slate-800 text-white w-full py-2">Register</button>
+    <button onclick="login()" class="bg-green-600 text-white w-full py-2 rounded">
+      Login
+    </button>
+
+    <button onclick="toggleAuth(false)" class="mt-3 text-sm w-full">Close</button>
 
   </div>
 </div>
 
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-white mt-10 p-10">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-6 text-sm">
+
+    <div>
+      <h3 class="font-bold text-green-400 text-lg">BidUp</h3>
+      <p class="text-gray-400">Zimbabwe’s trusted vehicle marketplace</p>
+    </div>
+
+    <div>
+      <h4 class="font-bold">Quick Links</h4>
+      <p>Buy Cars</p>
+      <p>Sell Cars</p>
+      <p>Auctions</p>
+    </div>
+
+    <div>
+      <h4 class="font-bold">Support</h4>
+      <p>Help Centre</p>
+      <p>Terms</p>
+    </div>
+
+    <div>
+      <h4 class="font-bold">Contact</h4>
+      <p>Harare, Zimbabwe</p>
+      <p>support@bidup.co.zw</p>
+    </div>
+
+  </div>
+</footer>
+
 <script>
-/* ================= STATE ================= */
-const API = "https://api.bidup.co.zw";
-const socket = io(API, { transports:["polling"] });
+let currentUser = null;
 
-let user = JSON.parse(localStorage.getItem("user"));
+/* =====================
+DUMMY CARS (IMPORTANT)
+===================== */
+const dummyCars = [
+  { _id:"1", title:"Toyota Hilux 2.8 GD6", price:15000, image:"https://source.unsplash.com/400x300/?pickup" },
+  { _id:"2", title:"BMW X5 M Sport", price:22000, image:"https://source.unsplash.com/400x300/?bmw" },
+  { _id:"3", title:"Mercedes C200", price:18000, image:"https://source.unsplash.com/400x300/?mercedes" }
+];
 
-/* ================= INIT ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  bindUI();
-  updateUI();
-  loadAuctions();
-});
+/* =====================
+LOAD GRID
+===================== */
+function loadCars(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-/* ================= UI ================= */
-function bindUI() {
-  document.getElementById("loginBtn").onclick = () => toggleAuth(true);
-  document.getElementById("logoutBtn").onclick = logout;
+  dummyCars.forEach(car=>{
+    const div = document.createElement("div");
+    div.className = "bg-white p-3 rounded shadow card";
 
-  document.getElementById("loginSubmit").onclick = login;
-  document.getElementById("registerSubmit").onclick = register;
+    div.innerHTML = `
+      <img src="${car.image}" class="h-40 w-full object-cover rounded">
+      <h3 class="font-bold mt-2">${car.title}</h3>
+      <p class="text-green-700 font-bold">$${car.price}</p>
 
-  document.getElementById("createBtn").onclick = createAuction;
+      <button onclick="bid('${car._id}', ${car.price})"
+        class="mt-2 w-full bg-green-600 text-white py-2 rounded">
+        Place Bid
+      </button>
+    `;
 
-  document.querySelectorAll(".tabBtn").forEach(btn => {
-    btn.onclick = () => showTab(btn.dataset.tab);
+    grid.appendChild(div);
   });
 }
 
-function updateUI() {
-  const nav = document.getElementById("nav");
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+/* =====================
+TABS
+===================== */
+function showTab(tab){
+  document.querySelectorAll("section[id^='tab']").forEach(s=>s.classList.add("hidden"));
+  document.getElementById("tab-"+tab).classList.remove("hidden");
+}
 
-  if (user) {
-    nav.classList.remove("hidden");
-    loginBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
-  } else {
-    nav.classList.add("hidden");
-    loginBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
+/* =====================
+AUTH
+===================== */
+function toggleAuth(show){
+  document.getElementById("auth").classList.toggle("hidden", !show);
+}
+
+async function login(){
+  const res = await fetch("/api/auth/login", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    localStorage.setItem("token", data.token);
+    currentUser = data.user;
+    toggleAuth(false);
+    alert("Logged in");
   }
 }
 
-function toggleAuth(v){
-  document.getElementById("authModal").classList.toggle("hidden", !v);
-}
+/* =====================
+SELL CAR (PENDING)
+===================== */
+async function submitCar(){
+  const token = localStorage.getItem("token");
 
-function showTab(tab){
-  document.querySelectorAll(".tab").forEach(t => t.classList.add("hidden"));
-  document.getElementById("tab-" + tab).classList.remove("hidden");
-}
+  if(!token){
+    alert("Login required to sell");
+    toggleAuth(true);
+    return;
+  }
 
-/* ================= SOCKET ================= */
-socket.on("connect", () => {
-  socket.emit("getLiveAuctions");
-});
-
-socket.on("initAuctions", (data) => {
-  const grid = document.getElementById("auctionGrid");
-  grid.innerHTML = "";
-  data.forEach(a => grid.appendChild(card(a)));
-});
-
-socket.on("bidUpdated", (d) => {
-  const el = document.querySelector(`[data-id="${d.auctionId}"] .price`);
-  if (el) el.textContent = "$" + d.currentPrice;
-});
-
-/* ================= CARD ================= */
-function card(a){
-  const div = document.createElement("div");
-  div.className = "bg-white p-4 rounded shadow";
-  div.dataset.id = a._id;
-
-  const end = a.endsAt ? new Date(a.endsAt) : null;
-
-  div.innerHTML = `
-    <h3 class="font-bold">${a.title}</h3>
-    <p class="price text-green-700 font-bold">$${a.currentPrice}</p>
-    <p class="text-sm text-gray-500 countdown"></p>
-    <button class="bidBtn bg-green-600 text-white px-3 py-1 mt-2 rounded">Bid</button>
-  `;
-
-  div.querySelector(".bidBtn").onclick = () => bid(a._id);
-
-  socket.emit("joinAuction", a._id);
-
-  if (end) startTimer(div, end);
-
-  return div;
-}
-
-/* ================= TIMER ================= */
-function startTimer(el, endTime){
-  setInterval(() => {
-    const now = Date.now();
-    const diff = endTime - now;
-
-    if (diff <= 0) {
-      el.querySelector(".countdown").textContent = "ENDED";
-      return;
-    }
-
-    const m = Math.floor(diff / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-
-    el.querySelector(".countdown").textContent = `${m}m ${s}s left`;
-  }, 1000);
-}
-
-/* ================= AUCTION ================= */
-async function loadAuctions(){
-  const res = await fetch(API + "/api/auctions");
-  const data = await res.json();
-
-  const grid = document.getElementById("auctionGrid");
-  grid.innerHTML = "";
-  data.forEach(a => grid.appendChild(card(a)));
-}
-
-async function createAuction(){
-  await fetch(API + "/api/auctions/create", {
+  await fetch("/api/seller/auctions", {
     method:"POST",
     headers:{
       "Content-Type":"application/json",
-      "Authorization":"Bearer " + localStorage.getItem("token")
+      "Authorization":"Bearer " + token
     },
     body: JSON.stringify({
       title: title.value,
@@ -229,144 +214,25 @@ async function createAuction(){
     })
   });
 
-  loadAuctions();
+  alert("Submitted for admin approval");
 }
 
-/* ================= BID ================= */
-function bid(id){
-  if (!user) return toggleAuth(true);
+/* =====================
+BID (LOGIN REQUIRED)
+===================== */
+function bid(id, price){
+  if(!localStorage.getItem("token")){
+    alert("Login required to bid");
+    toggleAuth(true);
+    return;
+  }
 
-  socket.emit("placeBid", {
-    auctionId: id,
-    bidAmount: 1000,
-    userId: user._id
-  });
+  alert("Bid placed (backend will connect next step)");
 }
 
-/* ================= AUTH ================= */
-async function login(){
-  const res = await fetch(API + "/api/auth/login", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      email: email.value,
-      password: password.value
-    })
-  });
-
-  const d = await res.json();
-  if (!d.token) return alert("Login failed");
-
-  localStorage.setItem("token", d.token);
-  localStorage.setItem("user", JSON.stringify(d.user));
-
-  user = d.user;
-  toggleAuth(false);
-  updateUI();
-}
-
-async function register(){
-  await fetch(API + "/api/auth/register", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      name: email.value.split("@")[0],
-      email: email.value,
-      password: password.value
-    })
-  });
-
-  alert("Registered");
-}
-
-function logout(){
-  localStorage.clear();
-  user = null;
-  updateUI();
-}
+/* INIT */
+loadCars();
 </script>
 
-  <!-- ===================== -->
-<!-- V3 FOOTER (MARKETPLACE READY) -->
-<!-- ===================== -->
-<footer class="bg-slate-900 text-white mt-16">
-
-  <div class="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-8 text-sm">
-
-    <!-- BRAND -->
-    <div>
-      <h3 class="text-2xl font-black text-green-400">BidUp</h3>
-      <p class="mt-2 text-slate-300">
-        Zimbabwe’s modern vehicle auction marketplace built for speed, trust, and real-time bidding.
-      </p>
-
-      <div class="mt-4 text-xs text-slate-400">
-        BID. WIN. DRIVE.
-      </div>
-    </div>
-
-    <!-- QUICK LINKS -->
-    <div>
-      <h4 class="font-bold mb-3 text-white">Quick Links</h4>
-      <ul class="space-y-2 text-slate-300">
-
-        <li><a href="#" onclick="showTab('auctions')" class="hover:text-green-400">Live Auctions</a></li>
-
-        <li><a href="#" onclick="showTab('create')" class="hover:text-green-400">Sell Vehicle</a></li>
-
-        <li><a href="#" onclick="showTab('dashboard')" class="hover:text-green-400">Dashboard</a></li>
-
-        <li><a href="#" onclick="toggleAuth(true)" class="hover:text-green-400">Login / Register</a></li>
-
-      </ul>
-    </div>
-
-    <!-- SUPPORT -->
-    <div>
-      <h4 class="font-bold mb-3 text-white">Support</h4>
-      <ul class="space-y-2 text-slate-300">
-
-        <li><a href="#" class="hover:text-green-400">Help Centre</a></li>
-
-        <li><a href="#" class="hover:text-green-400">Terms & Conditions</a></li>
-
-        <li><a href="#" class="hover:text-green-400">Privacy Policy</a></li>
-
-        <li><a href="#" class="hover:text-green-400">Safety Guidelines</a></li>
-
-      </ul>
-    </div>
-
-    <!-- CONTACT -->
-    <div>
-      <h4 class="font-bold mb-3 text-white">Contact</h4>
-
-      <p class="text-slate-300">Harare, Zimbabwe</p>
-      <p class="text-slate-300">support@bidup.co.zw</p>
-      <p class="text-slate-300">+263 XXX XXX XXX</p>
-
-      <div class="mt-4 flex gap-3 text-xs text-slate-400">
-        <span>⚡ Real-time bidding</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- BOTTOM BAR -->
-  <div class="border-t border-slate-800">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between text-xs text-slate-400">
-
-      <div>
-        © 2026 BidUp. All rights reserved.
-      </div>
-
-      <div class="mt-2 md:mt-0">
-        Built for Zimbabwe’s automotive marketplace
-      </div>
-
-    </div>
-  </div>
-
-</footer>
 </body>
 </html>
