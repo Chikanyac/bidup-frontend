@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidUp Marketplace</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{ --brand:#0a7c5a; }
+body{font-family:Outfit,sans-serif;background:#f8fafc;}
+.glass{backdrop-filter:blur(12px);}
+</style>
+</head>
+
+<body class="text-slate-800">
+
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
+  <div class="max-w-7xl mx-auto flex justify-between p-4">
+    <div>
+      <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
+      <span class="text-[10px] font-bold tracking-[0.2em] text-green-700">BID. WIN. DRIVE.</span>
+    </div>
+
+    <div class="flex gap-2">
+      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-4 py-2 rounded">Login</button>
+      <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+    </div>
+  </div>
+</header>
+
+<!-- NAV (PUBLIC) -->
+<div id="dashboardNav" class="max-w-7xl mx-auto mt-24 px-6 flex gap-2">
+  <button onclick="showTab('home')" class="bg-green-600 text-white px-3 py-2 rounded">Home</button>
+  <button onclick="showTab('auctions')" class="bg-slate-800 text-white px-3 py-2 rounded">Auctions</button>
+  <button onclick="showTab('create')" class="bg-slate-700 text-white px-3 py-2 rounded">Sell Car</button>
+  <button onclick="showTab('dashboard')" class="bg-slate-600 text-white px-3 py-2 rounded">Dashboard</button>
+  <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">Rules</button>
+</div>
+
+
+<!-- ENHANCED HOMEPAGE -->
+<section class="pt-28 bg-gradient-to-b from-green-50 via-emerald-50 to-white border-b">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <div class="max-w-3xl">
+      <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-green-200 text-green-700 rounded-full text-xs font-semibold shadow-sm">
+        ✓ VERIFIED AUCTIONS • COMPLIANT • TRUSTED
+      </span>
+      <h1 class="mt-5 text-5xl md:text-7xl font-black leading-tight">
+        Zimbabwe's trusted online vehicle auctions
+      </h1>
+      <p class="mt-5 text-lg text-slate-600 max-w-2xl">
+        Buy and sell vehicles under 10 years old. Every listing is verified for ownership and compliance.
+      </p>
+
+      <div class="mt-8 flex flex-col sm:flex-row gap-3">
+        <button onclick="showTab('auctions')" class="px-6 py-4 bg-green-700 text-white rounded-xl font-semibold">
+          Browse Live Auctions
+        </button>
+        <button onclick="showTab('create')" class="px-6 py-4 bg-white border rounded-xl font-semibold">
+          Sell Your Car
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-home" class="max-w-7xl mx-auto px-6 py-10">
+  <div class="bg-white rounded-2xl shadow-xl border p-5 mb-10">
+    <div class="grid md:grid-cols-4 gap-3">
+      <input placeholder="Make or model" class="px-4 py-3 border rounded-xl">
+      <input placeholder="Maximum Price" class="px-4 py-3 border rounded-xl">
+      <input placeholder="Location" class="px-4 py-3 border rounded-xl">
+      <button onclick="showTab('auctions')" class="bg-slate-900 text-white rounded-xl px-4 py-3">
+        Search Auctions
+      </button>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-4 gap-6 mb-12">
+    <div class="bg-white border rounded-2xl p-6 text-center">
+      <div class="text-3xl font-black text-green-700">500+</div>
+      <div class="text-sm text-slate-500">Vehicles Sold</div>
+    </div>
+    <div class="bg-white border rounded-2xl p-6 text-center">
+      <div class="text-3xl font-black text-green-700">98%</div>
+      <div class="text-sm text-slate-500">Successful Transfers</div>
+    </div>
+    <div class="bg-white border rounded-2xl p-6 text-center">
+      <div class="text-3xl font-black text-green-700">24/7</div>
+      <div class="text-sm text-slate-500">Online Bidding</div>
+    </div>
+    <div class="bg-white border rounded-2xl p-6 text-center">
+      <div class="text-3xl font-black text-green-700">100%</div>
+      <div class="text-sm text-slate-500">Verified Listings</div>
+    </div>
+  </div>
+
+  <h3 class="text-3xl font-bold mb-4">Featured Vehicles</h3>
+  <div id="featuredVehicles"></div>
+</section>
+
+
+<!-- AUCTIONS -->
+<section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
+  <h3 class="text-2xl font-bold">Live Auctions</h3>
+</section>
+
+<!-- SELL CAR -->
+<section id="tab-create" class="hidden max-w-5xl mx-auto px-6 py-10">
+
+<h3 class="text-2xl font-bold mb-4">Sell Your Car - Onboarding</h3>
+
+<!-- LEGAL BOX -->
+<div class="bg-white border-2 border-black p-5 mb-6 rounded-xl">
+
+  <p class="text-xs font-bold uppercase mb-2">Legal Agreement</p>
+
+  <p class="text-sm mb-4">
+    By submitting, you agree to BidUp Auction Rules, CPA, ZIMRA compliance, and ownership warranty.
+  </p>
+
+  <label class="flex gap-2 text-sm mb-3">
+    <input id="acceptSellerTerms" type="checkbox">
+    I accept Seller Legal Terms
+  </label>
+
+  <button onclick="downloadSellerPDF()" class="bg-black text-white px-4 py-2 rounded disabled:opacity-40" id="sellerPdfBtn">
+    Download Seller PDF
+  </button>
+
+</div>
+
+<!-- FORM -->
+<div id="sellerForm" class="opacity-50 pointer-events-none">
+
+  <div class="grid md:grid-cols-4 gap-3 bg-white p-5 rounded-xl border mb-6">
+    <input placeholder="Seller Name">
+    <input placeholder="Vehicle">
+    <input placeholder="Reg No">
+    <input type="date">
+  </div>
+
+  <div class="bg-white p-5 rounded-xl border">
+    <h4 class="font-bold mb-3">Checklist Locked Until Terms Accepted</h4>
+    <p class="text-sm text-slate-500">
+      Accept legal terms to enable checklist submission.
+    </p>
+  </div>
+
+</div>
+
+</section>
+
+<!-- RULES -->
+<section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
+
+  <h3 class="text-2xl font-bold mb-6">
+    Rules of Auction (Zimbabwe - Timed Online Vehicle Auctions)
+  </h3>
+
+  <!-- DISCLAIMER -->
+  <div class="border-2 border-black p-4 mb-6 bg-white">
+    <p class="text-xs font-bold uppercase mb-2">Important Notice</p>
+    <p class="text-sm">
+      This template is based on Zimbabwe's Consumer Protection Act [Chapter 14:14] (2019),
+      ZIMRA vehicle transfer requirements, and Statutory Instrument 59 of 2026.
+      It is not legal advice. Auctions may require cooling-off exemptions.
+    </p>
+  </div>
+
+  <!-- 1 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">1. Definitions</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Auctioneer</li>
+      <li>Platform</li>
+      <li>Buyer</li>
+      <li>Seller</li>
+      <li>Lot</li>
+      <li>Reserve</li>
+      <li>Fall of Hammer = automatic close time</li>
+      <li>CVR4</li>
+      <li>Special Excise Duty</li>
+    </ul>
+  </div>
+
+  <!-- 2 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">2. Legal Framework</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Consumer Protection Act Chapter 14:14 applies</li>
+      <li>7-day cooling-off may apply unless waived for auction sales</li>
+      <li>Vehicle transfer must be completed within 14 days</li>
+    </ul>
+  </div>
+
+  <!-- 3 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">3. Registration</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Must be 18+ with valid ID/passport</li>
+      <li>Proof of residence required</li>
+      <li>Refundable bidding deposit may apply</li>
+      <li>One account per user</li>
+    </ul>
+  </div>
+
+  <!-- 4 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">4. Vehicle Eligibility</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>No vehicles older than 10 years unless exempt</li>
+      <li>Seller must confirm legal ownership or exemption</li>
+    </ul>
+  </div>
+
+  <!-- 5 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">5. Auction Format</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Timed online auctions</li>
+      <li>Auto-extend in final 2 minutes</li>
+      <li>Viewing available at designated locations</li>
+    </ul>
+  </div>
+
+  <!-- 6 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">6. Reserve & Bidding</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Reserve may be undisclosed</li>
+      <li>Highest bid at close wins subject to reserve</li>
+    </ul>
+  </div>
+
+  <!-- 7 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">7. Payments & Fees</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Payment within 24 hours</li>
+      <li>Buyer pays taxes & duties (ZIMRA)</li>
+      <li>Documentation fee may apply</li>
+    </ul>
+  </div>
+
+  <!-- 8 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">8. Ownership Transfer</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Transfer must be completed within 14 days</li>
+      <li>Seller provides registration book + CVR4 + ID docs</li>
+      <li>Buyer provides ID & proof of residence</li>
+    </ul>
+  </div>
+
+  <!-- 9 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">9. Risk & Delivery</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Risk passes on fall of hammer</li>
+      <li>Collection within 72 hours</li>
+      <li>Sold as-is condition</li>
+    </ul>
+  </div>
+
+  <!-- 10 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">10. Consumer Rights</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Cooling-off may apply under CPA</li>
+      <li>Auction exemption may require waiver</li>
+      <li>Return rules depend on legal classification</li>
+    </ul>
+  </div>
+
+  <!-- 11 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">11. Default</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Non-payment leads to forfeiture of deposit</li>
+      <li>Vehicle may be re-auctioned</li>
+    </ul>
+  </div>
+
+  <!-- 12 -->
+  <div class="bg-white p-5 border rounded-xl mb-4">
+    <h4 class="font-bold mb-2">12. Privacy</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Data processed under Zimbabwe Data Protection Act</li>
+      <li>Marketing opt-out available</li>
+    </ul>
+  </div>
+
+  <!-- 13 -->
+  <div class="bg-white p-5 border rounded-xl">
+    <h4 class="font-bold mb-2">13. Governing Law</h4>
+    <ul class="list-disc ml-5 text-sm space-y-1">
+      <li>Laws of Zimbabwe</li>
+      <li>Jurisdiction: Harare courts</li>
+    </ul>
+  </div>
+
+<label class="flex gap-2 mt-4 text-sm">
+  <input id="acceptTerms" type="checkbox">
+  I accept Auction Rules & Legal Terms
+</label>
+
+<button onclick="downloadRulesPDF()" id="pdfBtn" class="bg-black text-white px-4 py-2 rounded mt-3 disabled:opacity-40">
+  Download Rules PDF
+</button>
+
+</section>
+
+<!-- AUTH -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
+  <div class="bg-white p-6 rounded w-80">
+    <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
+    <input id="password" type="password" class="border p-2 w-full mb-2" placeholder="Password">
+    <button onclick="login()" class="bg-green-600 text-white w-full p-2">Login</button>
+  </div>
+</div>
+
+<script>
+
+const TERMS_KEY = "bidup_terms_accepted";
+const SELLER_KEY = "bidup_seller_terms";
+
+let currentUser = JSON.parse(localStorage.getItem("user"));
+
+/* NAV */
+function showTab(tab){
+  document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
+  document.getElementById("tab-" + tab).classList.remove("hidden");
+}
+
+/* LEGAL STATE */
+function updateLegalUI(){
+  const accepted = localStorage.getItem(TERMS_KEY) === "true";
+
+  document.getElementById("pdfBtn").disabled = !accepted;
+  document.getElementById("sellerForm").classList.toggle("pointer-events-none", !accepted);
+  document.getElementById("sellerForm").classList.toggle("opacity-50", !accepted);
+}
+
+/* SELLER STATE */
+function updateSellerUI(){
+  const accepted = localStorage.getItem(SELLER_KEY) === "true";
+  document.getElementById("sellerPdfBtn").disabled = !accepted;
+}
+
+/* RULES PDF */
+function downloadRulesPDF(){
+  if(localStorage.getItem(TERMS_KEY) !== "true")
+    return alert("Accept terms first");
+
+  html2pdf().from(document.getElementById("rulesContent")).save("BidUp-Rules.pdf");
+}
+
+/* SELLER PDF */
+function downloadSellerPDF(){
+  if(localStorage.getItem(SELLER_KEY) !== "true")
+    return alert("Accept seller terms first");
+
+  html2pdf().from(document.getElementById("sellerForm")).save("BidUp-Seller.pdf");
+}
+
+/* INIT */
+window.addEventListener("DOMContentLoaded", () => {
+
+  const rulesCB = document.getElementById("acceptTerms");
+  const sellerCB = document.getElementById("acceptSellerTerms");
+
+  rulesCB.checked = localStorage.getItem(TERMS_KEY) === "true";
+  sellerCB.checked = localStorage.getItem(SELLER_KEY) === "true";
+
+  rulesCB.onchange = () => {
+    localStorage.setItem(TERMS_KEY, rulesCB.checked);
+    updateLegalUI();
+  };
+
+  sellerCB.onchange = () => {
+    localStorage.setItem(SELLER_KEY, sellerCB.checked);
+    updateSellerUI();
+  };
+
+  updateLegalUI();
+  updateSellerUI();
+
+  showTab("home");
+});
+
+/* AUTH (simplified) */
+function toggleAuth(show){
+  document.getElementById("authModal").classList.toggle("hidden", !show);
+}
+
+function login(){
+  localStorage.setItem("user", JSON.stringify({ email: email.value }));
+  currentUser = true;
+  toggleAuth(false);
+}
+
+function logout(){
+  localStorage.clear();
+  location.reload();
+}
+
+</script>
+
+</body>
+</html>
