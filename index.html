@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BidUp Marketplace</title>
+<title>GoBid ZW Marketplace</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -29,7 +29,7 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
     </div>
 
     <div class="flex gap-2">
-      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-4 py-2 rounded">Login</button>
+      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-4 py-2 rounded">Register to Bid</button>
       <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded">Logout</button>
     </div>
   </div>
@@ -44,75 +44,39 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
   <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">Rules</button>
 </div>
 
-
-<!-- GoBid Enhanced Hero -->
-<section class="pt-28 pb-20 bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 text-white">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="grid lg:grid-cols-2 gap-12 items-center">
-      <div>
-        <span class="inline-block px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold">
-          Zimbabwe's Trusted Vehicle Auction Marketplace
-        </span>
-        <h1 class="mt-6 text-5xl md:text-7xl font-black leading-tight">
-          Buy & Sell Vehicles With Confidence
-        </h1>
-        <p class="mt-6 text-lg text-green-50 max-w-2xl">
-          Verified listings, transparent bidding, compliant ownership transfers and secure online auctions.
-        </p>
-
-        <div class="mt-8 flex flex-wrap gap-4">
-          <button onclick="showTab('auctions')" class="px-6 py-4 bg-white text-green-800 rounded-xl font-bold">
-            Browse Auctions
-          </button>
-          <button onclick="showTab('create')" class="px-6 py-4 border border-white rounded-xl font-bold">
-            Sell a Vehicle
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-          <div><div class="text-3xl font-black">500+</div><div class="text-sm">Vehicles Sold</div></div>
-          <div><div class="text-3xl font-black">98%</div><div class="text-sm">Success Rate</div></div>
-          <div><div class="text-3xl font-black">24/7</div><div class="text-sm">Online Bidding</div></div>
-          <div><div class="text-3xl font-black">100%</div><div class="text-sm">Verified Listings</div></div>
-        </div>
-      </div>
-
-      <div>
-        <div class="bg-white text-slate-900 rounded-3xl shadow-2xl p-6">
-          <h3 class="text-2xl font-bold mb-4">Quick Vehicle Search</h3>
-          <div class="space-y-3">
-            <input class="w-full border rounded-xl px-4 py-3" placeholder="Vehicle Make or Model">
-            <input class="w-full border rounded-xl px-4 py-3" placeholder="Maximum Budget">
-            <input class="w-full border rounded-xl px-4 py-3" placeholder="Location">
-            <button onclick="showTab('auctions')" class="w-full bg-green-700 text-white py-3 rounded-xl font-semibold">
-              Search Live Auctions
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+<!-- HERO -->
+<section class="pt-28 bg-gradient-to-br from-green-700 to-emerald-600 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-20">
+    <h1 class="text-8xl font-black">Zimbabwe's trusted online vehicle auctions</h1>
+    <p class="mt-3 text-lg max-w-2xl">
+      Buy and sell vehicles under 10 years old. Verified compliance system.
+    </p>
   </div>
 </section>
 
-<section id="tab-home" class="max-w-7xl mx-auto px-6 py-14">
-  <h2 class="text-3xl font-bold mb-2">Featured Live Auctions</h2>
-  <p class="text-slate-600 mb-8">Browse verified vehicles currently available for bidding.</p>
+<!-- HOME -->
 
-  <div class="grid md:grid-cols-3 gap-6 mb-14">
-    <div class="bg-white border rounded-2xl p-6 shadow-sm">
-      <div class="text-green-700 font-bold mb-2">Verified Listings</div>
-      <p class="text-slate-600">All vehicles are reviewed before publication.</p>
-    </div>
-    <div class="bg-white border rounded-2xl p-6 shadow-sm">
-      <div class="text-green-700 font-bold mb-2">Secure Transactions</div>
-      <p class="text-slate-600">Transparent bidding and ownership transfers.</p>
-    </div>
-    <div class="bg-white border rounded-2xl p-6 shadow-sm">
-      <div class="text-green-700 font-bold mb-2">Nationwide Reach</div>
-      <p class="text-slate-600">Buy and sell vehicles from anywhere in Zimbabwe.</p>
-    </div>
-  </div>
+<section id="tab-home" class="pt-24">
+<div class="bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 text-white">
+<div class="max-w-7xl mx-auto px-6 py-20">
+<h1 class="text-6xl font-black">GoBid ZW Vehicle Auctions</h1>
+<p class="mt-4 text-xl max-w-3xl">Buy and sell verified vehicles through Zimbabwe's trusted auction marketplace.</p>
+<div class="mt-8 flex gap-4">
+<button onclick="showTab('auctions')" class="bg-white text-green-800 px-6 py-3 rounded-xl font-bold">Browse Auctions</button>
+<button onclick="showTab('create')" class="border border-white px-6 py-3 rounded-xl font-bold">Sell Vehicle</button>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-6 py-12">
+<h2 class="text-3xl font-bold mb-6">Featured Vehicles</h2>
+<div class="grid md:grid-cols-3 gap-6">
+<div class="border rounded-2xl p-4"><img src='https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800' class='rounded-xl mb-3'><h3 class='font-bold'>2022 Toyota Hilux</h3><p>Current Bid: $18,500</p></div>
+<div class="border rounded-2xl p-4"><img src='https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800' class='rounded-xl mb-3'><h3 class='font-bold'>2021 Ford Ranger</h3><p>Current Bid: $21,000</p></div>
+<div class="border rounded-2xl p-4"><img src='https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800' class='rounded-xl mb-3'><h3 class='font-bold'>2023 VW Polo</h3><p>Current Bid: $14,200</p></div>
+</div>
+</div>
 </section>
+
 
 <!-- AUCTIONS -->
 <section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
@@ -330,7 +294,7 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
   <div class="bg-white p-6 rounded w-80">
     <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
     <input id="password" type="password" class="border p-2 w-full mb-2" placeholder="Password">
-    <button onclick="login()" class="bg-green-600 text-white w-full p-2">Login</button>
+    <button onclick="login()" class="bg-green-600 text-white w-full p-2">Register to Bid</button>
   </div>
 </div>
 
@@ -423,32 +387,14 @@ function logout(){
 
 
 <footer class="bg-slate-900 text-white mt-20">
-  <div class="max-w-7xl mx-auto px-6 py-12">
-    <div class="grid md:grid-cols-4 gap-8">
-      <div>
-        <h3 class="font-bold text-xl mb-3">GoBid Zimbabwe</h3>
-        <p class="text-slate-400">Trusted online vehicle auctions and marketplace.</p>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-3">Navigation</h4>
-        <div class="space-y-2">
-          <a href="#" onclick="showTab('home')" class="block text-slate-300">Home</a>
-          <a href="#" onclick="showTab('auctions')" class="block text-slate-300">Auctions</a>
-          <a href="#" onclick="showTab('create')" class="block text-slate-300">Sell Vehicle</a>
-          <a href="#" onclick="showTab('dashboard')" class="block text-slate-300">Dashboard</a>
-          <a href="#" onclick="showTab('rules')" class="block text-slate-300">Rules</a>
-        </div>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-3">Marketplace</h4>
-        <p class="text-slate-400">Verified sellers, secure bidding and trusted transactions.</p>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-3">Support</h4>
-        <p class="text-slate-400">Contact support for assistance with auctions and transfers.</p>
-      </div>
-    </div>
-  </div>
+<div class="max-w-7xl mx-auto px-6 py-10">
+<div class="grid md:grid-cols-5 gap-4">
+<a href="#" onclick="showTab('home')">Home</a>
+<a href="#" onclick="showTab('auctions')">Live Auctions</a>
+<a href="#" onclick="showTab('create')">Sell Vehicle</a>
+<a href="#" onclick="showTab('dashboard')">Dashboard</a>
+<a href="#" onclick="showTab('rules')">Rules</a>
+</div>
+</div>
 </footer>
-</body>
-</html>
+</body></html>
