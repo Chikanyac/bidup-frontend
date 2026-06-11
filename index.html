@@ -169,7 +169,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 <!-- SCRIPT -->
 <script>
 const socket = io("https://api.bidup.co.zw", {
-  transports: ["polling"],   // FIX for Render
+  transports: ["polling"],
   withCredentials: true
 });
 
@@ -212,9 +212,12 @@ function renderAuction(a){
   div.className = "bg-white p-4 rounded shadow";
   div.dataset.id = a._id;
 
+  const endTime = a.endsAt ? new Date(a.endsAt).toLocaleTimeString() : "N/A";
+
   div.innerHTML = `
     <h3 class="font-bold">${a.title}</h3>
     <p class="text-green-700 font-bold price">$${a.currentPrice}</p>
+    <p class="text-xs text-gray-500">Ends: ${endTime}</p>
     <button onclick="bid(this)" class="mt-2 bg-green-600 text-white px-3 py-1 rounded">
       Bid
     </button>
@@ -227,36 +230,62 @@ function renderAuction(a){
 socket.on("initAuctions", (data)=>{
   const grid = document.getElementById("auctionGrid");
   grid.innerHTML = "";
+
+  if(!data || data.length === 0){
+    grid.innerHTML = "<p>No live auctions</p>";
+    return;
+  }
+
   data.forEach(a => grid.appendChild(renderAuction(a)));
 });
 
 socket.on("bidUpdated", (data)=>{
   const el = document.querySelector(`[data-id="${data.auctionId}"] .price`);
-  if(el) el.textContent = "$" + data.currentPrice;
+  if(el) el.textContent = "$" + Number(data.currentPrice).toLocaleString();
+});
+
+socket.on("auctionEnded", ({auctionId})=>{
+  const el = document.querySelector(`[data-id="${auctionId}"]`);
+  if(el){
+    el.innerHTML += "<p class='text-red-600 font-bold mt-2'>Auction Ended</p>";
+  }
 });
 
 /* ================= AUTH ================= */
 async function register(){
-  await fetch("https://api.bidup.co.zw/api/auth/register", {
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
+
+  const res = await fetch("https://api.bidup.co.zw/api/auth/register", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
-      name: email.value.split("@")[0],
-      email: email.value,
-      password: password.value
+      name: emailVal.split("@")[0],
+      email: emailVal,
+      password: passwordVal
     })
   });
 
-  alert("Registered");
+  const data = await res.json();
+
+  if(!res.ok){
+    alert(data.error || "Registration failed");
+    return;
+  }
+
+  alert("Registered successfully");
 }
 
 async function login(){
+  const emailVal = document.getElementById("email").value;
+  const passwordVal = document.getElementById("password").value;
+
   const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
-      email: email.value,
-      password: password.value
+      email: emailVal,
+      password: passwordVal
     })
   });
 
@@ -268,6 +297,8 @@ async function login(){
     currentUser = data.user;
     toggleAuth(false);
     updateUI();
+  } else {
+    alert(data.error || "Login failed");
   }
 }
 
@@ -280,6 +311,7 @@ function logout(){
 /* ================= BID ================= */
 function bid(btn){
   const card = btn.closest("[data-id]");
+
   socket.emit("placeBid", {
     auctionId: card.dataset.id,
     bidAmount: 1000,
