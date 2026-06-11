@@ -57,7 +57,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       Zimbabwe's trusted online vehicle auctions
     </h2>
     <p class="mt-3 text-lg max-w-2xl">
-      Buy and sell vehicles under 10 years old. Every listing is verified for ZIMRA duty, ownership, and age compliance.
+      Buy and sell vehicles under 10 years old. Every listing is verified for ZIMRA duty, ownership, and compliance.
     </p>
   </div>
 </section>
@@ -74,9 +74,7 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   <div id="auctionGrid2" class="grid md:grid-cols-3 gap-6"></div>
 </section>
 
-<!-- ========================= -->
-<!-- SELL CAR TAB (V3.2 UPGRADED) -->
-<!-- ========================= -->
+<!-- SELL CAR (V3.2 CHECKLIST) -->
 <section id="tab-create" class="hidden max-w-6xl mx-auto px-6 py-10">
 
   <h3 class="text-2xl font-bold mb-6">Sell Your Car - Seller Onboarding Checklist</h3>
@@ -85,42 +83,25 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   <div class="bg-white rounded-xl border p-5 mb-6 shadow-sm">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Seller Name</label>
-        <input type="text" data-key="seller" class="mt-1 w-full border-b py-1 outline-none">
-      </div>
-
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Vehicle</label>
-        <input type="text" data-key="vehicle" class="mt-1 w-full border-b py-1 outline-none">
-      </div>
-
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Reg No</label>
-        <input type="text" data-key="reg" class="mt-1 w-full border-b py-1 outline-none">
-      </div>
-
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Date</label>
-        <input type="date" data-key="date" class="mt-1 w-full border-b py-1 outline-none">
-      </div>
+      <input placeholder="Seller Name" class="border-b py-1 outline-none" data-key="seller">
+      <input placeholder="Vehicle" class="border-b py-1 outline-none" data-key="vehicle">
+      <input placeholder="Reg No" class="border-b py-1 outline-none" data-key="reg">
+      <input type="date" class="border-b py-1 outline-none" data-key="date">
 
     </div>
   </div>
 
-  <!-- CHECKLIST GRID -->
+  <!-- CHECKLIST -->
   <div class="grid md:grid-cols-2 gap-6">
 
-    <!-- 1 -->
     <div class="bg-white p-5 rounded-xl border">
       <h4 class="font-bold mb-3">1. SELLER VERIFICATION</h4>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>ID / Passport</span></label>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>Proof of residence</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Company docs (if any)</span></label>
+      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Company docs</span></label>
       <label class="flex gap-2"><input type="checkbox"><span>Bank details</span></label>
     </div>
 
-    <!-- 2 -->
     <div class="bg-white p-5 rounded-xl border">
       <h4 class="font-bold mb-3">2. VEHICLE DOCUMENTS</h4>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>Registration book</span></label>
@@ -129,44 +110,19 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       <label class="flex gap-2"><input type="checkbox"><span>Insurance</span></label>
     </div>
 
-    <!-- 3 -->
     <div class="bg-white p-5 rounded-xl border">
       <h4 class="font-bold mb-3">3. ELIGIBILITY</h4>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>VIN matches</span></label>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine matches</span></label>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>No outstanding duties</span></label>
-
-      <input type="text" data-key="year" placeholder="Year of manufacture"
-        class="mt-3 w-full border-b py-1 outline-none">
     </div>
 
-    <!-- 4 -->
     <div class="bg-white p-5 rounded-xl border">
       <h4 class="font-bold mb-3">4. PHOTOS</h4>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>Exterior</span></label>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>Interior</span></label>
       <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine bay</span></label>
-      <label class="flex gap-2"><input type="checkbox"><span>Walkaround video</span></label>
-    </div>
-
-    <!-- 5 -->
-    <div class="bg-white p-5 rounded-xl border">
-      <h4 class="font-bold mb-3">5. PRICING</h4>
-
-      <input type="text" data-key="usd" placeholder="USD Price"
-        class="w-full border-b py-1 mb-2 outline-none">
-
-      <input type="text" data-key="zig" placeholder="ZiG Price"
-        class="w-full border-b py-1 outline-none">
-    </div>
-
-    <!-- 6 -->
-    <div class="bg-white p-5 rounded-xl border">
-      <h4 class="font-bold mb-3">6. COMPLIANCE</h4>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Legal owner</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>No finance</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Transfer in 14 days</span></label>
-      <label class="flex gap-2"><input type="checkbox"><span>CPA terms accepted</span></label>
+      <label class="flex gap-2"><input type="checkbox"><span>Video</span></label>
     </div>
 
   </div>
@@ -201,11 +157,8 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 
 <!-- FOOTER -->
 <footer class="bg-slate-900 text-white p-10 mt-10">
-  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-6 text-sm">
-    <div>
-      <h3 class="font-bold">BidUp</h3>
-      <p>Zimbabwe's trusted vehicle auction platform</p>
-    </div>
+  <div class="max-w-6xl mx-auto text-sm">
+    <h3 class="font-bold">BidUp</h3>
   </div>
 </footer>
 
@@ -229,6 +182,29 @@ function updateUI(){
     document.getElementById("dashboardNav").classList.remove("hidden");
     document.getElementById("loginBtn").classList.add("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
+    showTab("home");
+  }
+}
+
+async function login(){
+  const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    currentUser = data.user;
+
+    toggleAuth(false);
+    updateUI();
   }
 }
 
@@ -236,6 +212,12 @@ function logout(){
   localStorage.clear();
   location.reload();
 }
+
+window.onload = () => {
+  if(currentUser){
+    updateUI();
+  }
+};
 </script>
 
 </body>
