@@ -125,7 +125,7 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
         </div>
       </div>
       <div>
-        <div class="bg-slate-900 text-white rounded-xl p-4">
+        <div class="bg-slate-900 text-white rounded-xl p-4"><div class="text-sm font-bold mb-2">Recent Bids</div><div id="bidHistoryList" class="space-y-1 max-h-40 overflow-y-auto"></div></div><div class="bg-slate-900 text-white rounded-xl p-4 mt-4">
           <div class="text-sm uppercase tracking-wide text-green-300">Place Your Bid</div>
           <div class="mt-2 text-2xl font-black" id="detailNextBid">$0</div>
           <button onclick="openBidModal()" class="w-full bg-green-600 hover:bg-green-500 mt-4 py-3 rounded-lg font-bold">BID NOW</button>
@@ -565,6 +565,7 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
 
 <script>
 
+const BACKEND_URL = "http://localhost:3000"; // CHANGE TO YOUR LIVE API URL WHEN DEPLOYED
 const TERMS_KEY = "bidup_terms_accepted";
 const SELLER_KEY = "bidup_seller_terms";
 
@@ -631,6 +632,280 @@ window.addEventListener("DOMContentLoaded", () => {
 
   showTab("home");
 });
+
+
+
+/* ===== LIVE AUCTION SYSTEM - INTEGRATED ===== */
+const socket = io(BACKEND_URL);
+const auctionTimers = new Map();
+const auctionData = new Map();
+let selectedAuction = null;
+let soundEnabled = true;
+
+// Sounds
+const outbidSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+const bidSound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+
+socket.on('connect', () => {
+  console.log('✅ Live connected');
+  loadLiveAuctions();
+});
+
+socket.on('bid_update', (data) => {
+  updateAuctionCard(data.auctionId, data.newPrice, data.bidCount);
+  if(data.endsAt) auctionTimers.set(data.auctionId, new Date(data.endsAt).getTime());
+  if(selectedAuction && selectedAuction._id === data.auctionId) {
+    updateDetailView(data);
+  }
+  // sound if outbid
+  if(soundEnabled && data.bidder !== (currentUser?.email || 'WebUser')) {
+    const myBid = localStorage.getItem('lastBid_' + data.auctionId);
+    if(myBid && data.newPrice > parseInt(myBid)) {
+      outbidSound.play().catch(()=>{});
+    }
+  }
+  flashCard(data.auctionId);
+});
+
+socket.on('new_auction', () => loadLiveAuctions());
+socket.on('watchers_update', (data) => {
+  const el = document.querySelector(`[data-watchers="${data.auctionId}"]`);
+  if(el) el.textContent = data.count;
+  if(selectedAuction && selectedAuction._id === data.auctionId) {
+    document.getElementById('detailWatchers').textContent = data.count;
+  }
+});
+
+async function loadLiveAuctions() {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auctions`);
+    const auctions = await res.json();
+    auctionData.clear();
+    auctions.forEach(a => auctionData.set(a._id, a));
+    
+    const grid = document.getElementById('liveAuctionsGrid');
+    if(!grid) return;
+    
+    if(!auctions.length) {
+      grid.innerHTML = '<div class="col-span-3 text-center py-16 text-slate-500">No live auctions. Create one in your backend.</div>';
+      return;
+    }
+    
+    grid.innerHTML = auctions.map(a => {
+      auctionTimers.set(a._id, new Date(a.endsAt).getTime());
+      socket.emit('watch', a._id);
+      
+      const timeLeft = Math.max(0, new Date(a.endsAt) - Date.now());
+      const mins = Math.floor(timeLeft / 60000);
+      
+      return `
+      <div onclick="openAuctionDetail('${a._id}')" class="bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition cursor-pointer group" id="card-${a._id}">
+        <div class="relative">
+          <img src="${a.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800'}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute top-3 left-3 bg-black/80 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold" id="timer-${a._id}">${mins}m</div>
+          <div class="absolute top-3 right-3 ${a.zimraCleared ? 'bg-green-600' : 'bg-amber-600'} text-white px-2 py-1 rounded text-[10px] font-bold">${a.zimraCleared ? 'ZIMRA ✓' : 'IN BOND'}</div>
+          <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span data-watchers="${a._id}">${a.watchers || 1}</span> watching
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-bold text-lg leading-tight">${a.title}</h3>
+          <p class="text-xs text-slate-500 mt-1">${a.location} • ${a.year || ''}</p>
+          
+          <div class="flex items-end justify-between mt-4">
+            <div>
+              <div class="text-[11px] text-slate-500 uppercase tracking-wide">Current Bid</div>
+              <div class="text-2xl font-black text-[var(--brand)]" id="price-${a._id}">$${a.currentPrice.toLocaleString()}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-slate-500">Bids</div>
+              <div class="font-bold" id="bids-${a._id}">${a.bids?.length || 0}</div>
+            </div>
+          </div>
+          
+          <button onclick="event.stopPropagation(); quickBid('${a._id}', ${a.currentPrice + (a.bidIncrement||250)})" class="w-full mt-3 bg-[var(--brand)] hover:bg-green-700 text-white font-bold py-2.5 rounded-xl transition">
+            Bid $${(a.currentPrice + (a.bidIncrement||250)).toLocaleString()}
+          </button>
+        </div>
+      </div>
+      `;
+    }).join('');
+  } catch(err) {
+    console.error('Load auctions failed', err);
+  }
+}
+
+function openAuctionDetail(id) {
+  const a = auctionData.get(id);
+  if(!a) return;
+  selectedAuction = a;
+  socket.emit('watch', id);
+  
+  document.getElementById('auctionDetail').classList.remove('hidden');
+  document.getElementById('detailTitle').textContent = a.title;
+  document.getElementById('detailMeta').textContent = `${a.location} • ${a.mileage ? a.mileage.toLocaleString() + ' km' : ''} • ${a.zimraCleared ? 'ZIMRA Cleared' : 'In Bond'}`;
+  document.getElementById('detailImage').src = a.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800';
+  document.getElementById('detailPrice').textContent = '$' + a.currentPrice.toLocaleString();
+  document.getElementById('detailBids').textContent = a.bids?.length || 0;
+  document.getElementById('detailWatchers').textContent = '1';
+  
+  // show mobile bar
+  document.getElementById('mobileBidBar').classList.remove('hidden');
+  document.getElementById('mobilePrice').textContent = '$' + a.currentPrice.toLocaleString();
+  
+  // scroll to detail
+  document.getElementById('auctionDetail').scrollIntoView({behavior: 'smooth'});
+  
+  loadBidHistory(id);
+}
+
+function updateDetailView(data) {
+  document.getElementById('detailPrice').textContent = '$' + data.newPrice.toLocaleString();
+  document.getElementById('detailBids').textContent = data.bidCount;
+  document.getElementById('mobilePrice').textContent = '$' + data.newPrice.toLocaleString();
+}
+
+function updateAuctionCard(id, price, count) {
+  const priceEl = document.getElementById(`price-${id}`);
+  const bidsEl = document.getElementById(`bids-${id}`);
+  if(priceEl) priceEl.textContent = '$' + price.toLocaleString();
+  if(bidsEl && count !== undefined) bidsEl.textContent = count;
+  
+  const a = auctionData.get(id);
+  if(a) {
+    a.currentPrice = price;
+    a.bids = a.bids || [];
+    a.bids.length = count;
+  }
+}
+
+function flashCard(id) {
+  const card = document.getElementById(`card-${id}`);
+  if(card) {
+    card.classList.add('ring-2', 'ring-green-500');
+    setTimeout(() => card.classList.remove('ring-2', 'ring-green-500'), 800);
+  }
+}
+
+async function quickBid(id, amount) {
+  if(!currentUser) return toggleAuth(true);
+  localStorage.setItem('lastBid_' + id, amount);
+  
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auctions/bid`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ auctionId: id, amount, bidder: currentUser.email || 'WebUser' })
+    });
+    const data = await res.json();
+    if(data.success) {
+      bidSound.play().catch(()=>{});
+    } else {
+      alert(data.error);
+    }
+  } catch(e) {
+    alert('Bid failed - check server');
+  }
+}
+
+function openBidModal() {
+  if(!selectedAuction) return;
+  if(!currentUser) return toggleAuth(true);
+  
+  const a = selectedAuction;
+  const nextBid = a.currentPrice + (a.bidIncrement || 250);
+  
+  document.getElementById('bidModalVehicle').textContent = a.title;
+  document.getElementById('bidModalCurrent').textContent = '$' + a.currentPrice.toLocaleString();
+  document.getElementById('bidModalYour').textContent = '$' + nextBid.toLocaleString();
+  document.getElementById('bidModalMin').textContent = '$' + nextBid.toLocaleString();
+  document.getElementById('bidModal').dataset.auctionId = a._id;
+  document.getElementById('bidModal').dataset.amount = nextBid;
+  
+  document.getElementById('bidModal').classList.remove('hidden');
+}
+
+function closeBidModal() {
+  document.getElementById('bidModal').classList.add('hidden');
+}
+
+function submitBid() {
+  const modal = document.getElementById('bidModal');
+  const id = modal.dataset.auctionId;
+  const amount = parseInt(modal.dataset.amount);
+  closeBidModal();
+  quickBid(id, amount);
+}
+
+// Bid history
+async function loadBidHistory(id) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auctions/${id}`);
+    const auction = await res.json();
+    const historyEl = document.getElementById('bidHistoryList');
+    if(!historyEl) return;
+    
+    const bids = (auction.bids || []).slice().reverse().slice(0,10);
+    historyEl.innerHTML = bids.map(b => `
+      <div class="flex justify-between py-2 border-b border-slate-100 last:border-0">
+        <div>
+          <div class="font-medium text-sm">${b.user || b.bidder || 'Anonymous'}</div>
+          <div class="text-[11px] text-slate-500">${new Date(b.time).toLocaleString()}</div>
+        </div>
+        <div class="font-bold text-green-700">$${b.amount.toLocaleString()}</div>
+      </div>
+    `).join('') || '<div class="text-center py-4 text-slate-400 text-sm">No bids yet</div>';
+  } catch(e) {}
+}
+
+// Countdown timers
+setInterval(() => {
+  const now = Date.now();
+  auctionTimers.forEach((end, id) => {
+    const el = document.getElementById(`timer-${id}`);
+    const detailTimer = selectedAuction && selectedAuction._id === id ? document.getElementById('detailTimer') : null;
+    if(!el && !detailTimer) return;
+    
+    const diff = end - now;
+    if(diff <= 0) {
+      if(el) { el.textContent = 'ENDED'; el.className = 'absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold'; }
+      if(detailTimer) detailTimer.textContent = 'ENDED';
+      return;
+    }
+    
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const str = `${m}:${s.toString().padStart(2,'0')}`;
+    
+    if(el) {
+      el.textContent = str;
+      el.className = diff < 60000 ? 'absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold pulse-red' :
+                     diff < 300000 ? 'absolute top-3 left-3 bg-amber-500 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold' :
+                     'absolute top-3 left-3 bg-black/80 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold';
+    }
+    if(detailTimer) {
+      detailTimer.textContent = str;
+      detailTimer.className = diff < 60000 ? 'text-3xl font-black text-red-600 pulse-red' : 'text-3xl font-black text-green-700';
+    }
+  });
+}, 1000);
+
+// Enable bid button when terms accepted
+document.getElementById('bidAccept')?.addEventListener('change', (e) => {
+  const btn = document.getElementById('confirmBidBtn');
+  btn.disabled = !e.target.checked;
+  btn.className = e.target.checked ? 'w-full bg-green-600 text-white mt-4 py-3 rounded-lg font-bold' : 'w-full bg-slate-300 text-white mt-4 py-3 rounded-lg font-bold';
+});
+
+// Auto-load auctions when tab shown
+const originalShowTab = showTab;
+showTab = function(tab) {
+  originalShowTab(tab);
+  if(tab === 'auctions') {
+    setTimeout(loadLiveAuctions, 100);
+  }
+};
 
 /* AUTH (simplified) */
 function toggleAuth(show){
