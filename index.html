@@ -168,107 +168,164 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 
 <!-- SCRIPT -->
 <script>
-const socket = io("https://api.bidup.co.zw", {
+const API_URL = "https://api.bidup.co.zw";
+const socket = io(API_URL, {
   transports: ["polling"],
   withCredentials: true
 });
 
+/* ================= STATE ================= */
 let currentUser = JSON.parse(localStorage.getItem("user")) || null;
 
+/* ================= DOM READY ================= */
+document.addEventListener("DOMContentLoaded", () => {
+  bindUI();
+  updateUI();
+  loadAuctions();
+});
+
+/* ================= UI BINDINGS ================= */
+function bindUI() {
+  document.getElementById("loginBtn").addEventListener("click", () => toggleAuth(true));
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  document.getElementById("loginSubmit")?.addEventListener("click", login);
+  document.getElementById("registerSubmit")?.addEventListener("click", register);
+
+  document.getElementById("createAuctionBtn")?.addEventListener("click", createAuction);
+}
+
 /* ================= UI ================= */
-function updateUI(){
+function updateUI() {
   const nav = document.getElementById("dashboardNav");
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  if(currentUser){
-    nav.classList.remove("hidden");
-    loginBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
+  if (currentUser) {
+    nav?.classList.remove("hidden");
+    loginBtn?.classList.add("hidden");
+    logoutBtn?.classList.remove("hidden");
   } else {
-    nav.classList.add("hidden");
-    loginBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
+    nav?.classList.add("hidden");
+    loginBtn?.classList.remove("hidden");
+    logoutBtn?.classList.add("hidden");
   }
 }
 
-function toggleAuth(show){
+function toggleAuth(show) {
   document.getElementById("authModal").classList.toggle("hidden", !show);
 }
 
-function showTab(tab){
-  document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
-  document.getElementById("tab-" + tab).classList.remove("hidden");
+function showTab(tab) {
+  document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
+  document.getElementById(`tab-${tab}`).classList.remove("hidden");
 }
 
 /* ================= SOCKET ================= */
 socket.on("connect", () => {
+  console.log("✅ socket connected");
   socket.emit("getLiveAuctions");
 });
 
 /* ================= AUCTIONS ================= */
-function renderAuction(a){
+function loadAuctions() {
+  socket.emit("getLiveAuctions");
+}
+
+socket.on("initAuctions", (auctions) => {
+  const grid = document.getElementById("auctionGrid");
+  grid.innerHTML = "";
+
+  if (!auctions || auctions.length === 0) {
+    grid.innerHTML = `<p class="text-gray-500">No live auctions</p>`;
+    return;
+  }
+
+  auctions.forEach(a => grid.appendChild(renderAuction(a)));
+});
+
+function renderAuction(a) {
   const div = document.createElement("div");
   div.className = "bg-white p-4 rounded shadow";
   div.dataset.id = a._id;
 
-  const endTime = a.endsAt ? new Date(a.endsAt).toLocaleTimeString() : "N/A";
-
   div.innerHTML = `
-    <h3 class="font-bold">${a.title}</h3>
-    <p class="text-green-700 font-bold price">$${a.currentPrice}</p>
-    <p class="text-xs text-gray-500">Ends: ${endTime}</p>
-    <button onclick="bid(this)" class="mt-2 bg-green-600 text-white px-3 py-1 rounded">
-      Bid
+    <h3 class="font-bold text-lg">${a.title}</h3>
+    <p class="text-green-700 font-bold price">
+      $${Number(a.currentPrice).toLocaleString()}
+    </p>
+    <button class="bidBtn mt-2 bg-green-600 text-white px-3 py-1 rounded">
+      Place Bid
     </button>
   `;
 
+  div.querySelector(".bidBtn").addEventListener("click", () => bid(a._id));
+
   socket.emit("joinAuction", a._id);
+
   return div;
 }
 
-socket.on("initAuctions", (data)=>{
-  const grid = document.getElementById("auctionGrid");
-  grid.innerHTML = "";
+/* ================= CREATE AUCTION ================= */
+async function createAuction() {
+  const token = localStorage.getItem("token");
 
-  if(!data || data.length === 0){
-    grid.innerHTML = "<p>No live auctions</p>";
+  const title = document.getElementById("carTitle").value;
+  const startingPrice = document.getElementById("carPrice").value;
+  const image = document.getElementById("carImage").value;
+
+  const res = await fetch(`${API_URL}/api/auctions/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ title, startingPrice, image })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Failed to create auction");
     return;
   }
 
-  data.forEach(a => grid.appendChild(renderAuction(a)));
-});
+  alert("Auction created");
+  loadAuctions();
+}
 
-socket.on("bidUpdated", (data)=>{
-  const el = document.querySelector(`[data-id="${data.auctionId}"] .price`);
-  if(el) el.textContent = "$" + Number(data.currentPrice).toLocaleString();
-});
-
-socket.on("auctionEnded", ({auctionId})=>{
-  const el = document.querySelector(`[data-id="${auctionId}"]`);
-  if(el){
-    el.innerHTML += "<p class='text-red-600 font-bold mt-2'>Auction Ended</p>";
+/* ================= BID ================= */
+function bid(auctionId) {
+  if (!currentUser) {
+    toggleAuth(true);
+    return;
   }
-});
+
+  socket.emit("placeBid", {
+    auctionId,
+    bidAmount: 1000,
+    userId: currentUser._id
+  });
+}
 
 /* ================= AUTH ================= */
-async function register(){
-  const emailVal = document.getElementById("email").value;
-  const passwordVal = document.getElementById("password").value;
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  const res = await fetch("https://api.bidup.co.zw/api/auth/register", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
+  const res = await fetch(`${API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: emailVal.split("@")[0],
-      email: emailVal,
-      password: passwordVal
+      name: email.split("@")[0],
+      email,
+      password
     })
   });
 
   const data = await res.json();
 
-  if(!res.ok){
+  if (!res.ok) {
     alert(data.error || "Registration failed");
     return;
   }
@@ -276,51 +333,52 @@ async function register(){
   alert("Registered successfully");
 }
 
-async function login(){
-  const emailVal = document.getElementById("email").value;
-  const passwordVal = document.getElementById("password").value;
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      email: emailVal,
-      password: passwordVal
-    })
+  const res = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
   });
 
   const data = await res.json();
 
-  if(data.token){
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    currentUser = data.user;
-    toggleAuth(false);
-    updateUI();
-  } else {
+  if (!data.token) {
     alert(data.error || "Login failed");
+    return;
   }
+
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  currentUser = data.user;
+  toggleAuth(false);
+  updateUI();
 }
 
-function logout(){
+/* ================= LOGOUT ================= */
+function logout() {
   localStorage.clear();
   currentUser = null;
   updateUI();
 }
 
-/* ================= BID ================= */
-function bid(btn){
-  const card = btn.closest("[data-id]");
+/* ================= SOCKET EVENTS ================= */
+socket.on("bidUpdated", (data) => {
+  const el = document.querySelector(`[data-id="${data.auctionId}"] .price`);
+  if (el) {
+    el.textContent = "$" + Number(data.currentPrice).toLocaleString();
+  }
+});
 
-  socket.emit("placeBid", {
-    auctionId: card.dataset.id,
-    bidAmount: 1000,
-    userId: currentUser?._id
-  });
-}
-
-/* INIT */
-updateUI();
+socket.on("auctionEnded", ({ auctionId }) => {
+  const card = document.querySelector(`[data-id="${auctionId}"]`);
+  if (card) {
+    card.innerHTML += `<p class="text-red-600 font-bold mt-2">Auction Ended</p>`;
+  }
+});
 </script>
 
 </body>
