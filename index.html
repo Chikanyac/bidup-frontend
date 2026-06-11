@@ -40,14 +40,15 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </div>
 </header>
 
-<!-- NAV -->
-<div id="dashboardNav" class="hidden max-w-7xl mx-auto mt-24 px-6 flex flex-wrap gap-2">
+<!-- NAV (PUBLIC - ALWAYS VISIBLE) -->
+<div id="dashboardNav" class="max-w-7xl mx-auto mt-24 px-6 flex flex-wrap gap-2">
+
   <button onclick="showTab('home')" class="bg-green-600 text-white px-3 py-2 rounded">Home</button>
   <button onclick="showTab('auctions')" class="bg-slate-800 text-white px-3 py-2 rounded">Auctions</button>
   <button onclick="showTab('create')" class="bg-slate-700 text-white px-3 py-2 rounded">Sell Car</button>
   <button onclick="showTab('dashboard')" class="bg-slate-600 text-white px-3 py-2 rounded">Dashboard</button>
   <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">Rules</button>
-  <button onclick="showTab('seller')" class="bg-emerald-700 text-white px-3 py-2 rounded">Seller Checklist</button>
+
 </div>
 
 <!-- HERO -->
@@ -71,15 +72,13 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 <!-- AUCTIONS -->
 <section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
   <h3 class="text-2xl font-bold mb-4">Live Auctions</h3>
-  <div id="auctionGrid2" class="grid md:grid-cols-3 gap-6"></div>
 </section>
 
-<!-- SELL CAR (V3.2 CHECKLIST) -->
+<!-- SELL CAR -->
 <section id="tab-create" class="hidden max-w-6xl mx-auto px-6 py-10">
 
-  <h3 class="text-2xl font-bold mb-6">Sell Your Car - Seller Onboarding Checklist</h3>
+  <h3 class="text-2xl font-bold mb-6">Sell Your Car - Checklist</h3>
 
-  <!-- BASIC INFO -->
   <div class="bg-white rounded-xl border p-5 mb-6 shadow-sm">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -91,7 +90,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
     </div>
   </div>
 
-  <!-- CHECKLIST -->
   <div class="grid md:grid-cols-2 gap-6">
 
     <div class="bg-white p-5 rounded-xl border">
@@ -110,21 +108,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
       <label class="flex gap-2"><input type="checkbox"><span>Insurance</span></label>
     </div>
 
-    <div class="bg-white p-5 rounded-xl border">
-      <h4 class="font-bold mb-3">3. ELIGIBILITY</h4>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>VIN matches</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine matches</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>No outstanding duties</span></label>
-    </div>
-
-    <div class="bg-white p-5 rounded-xl border">
-      <h4 class="font-bold mb-3">4. PHOTOS</h4>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Exterior</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Interior</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine bay</span></label>
-      <label class="flex gap-2"><input type="checkbox"><span>Video</span></label>
-    </div>
-
   </div>
 </section>
 
@@ -136,11 +119,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 <!-- RULES -->
 <section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
   <h3 class="text-2xl font-bold">Rules</h3>
-</section>
-
-<!-- SELLER -->
-<section id="tab-seller" class="hidden max-w-4xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold">Seller Checklist</h3>
 </section>
 
 <!-- AUTH -->
@@ -162,7 +140,6 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   </div>
 </footer>
 
-<!-- SCRIPT -->
 <script>
 const socket = io("https://api.bidup.co.zw", { transports: ["polling"] });
 
@@ -179,11 +156,10 @@ function toggleAuth(show){
 
 function updateUI(){
   if(currentUser){
-    document.getElementById("dashboardNav").classList.remove("hidden");
     document.getElementById("loginBtn").classList.add("hidden");
     document.getElementById("logoutBtn").classList.remove("hidden");
-    showTab("home");
   }
+  showTab("home");
 }
 
 async function login(){
@@ -210,13 +186,13 @@ async function login(){
 
 function logout(){
   localStorage.clear();
+  currentUser = null;
   location.reload();
 }
 
 window.onload = () => {
-  if(currentUser){
-    updateUI();
-  }
+  showTab("home");
+  if(currentUser) updateUI();
 };
 </script>
 
