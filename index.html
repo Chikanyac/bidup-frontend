@@ -24,8 +24,9 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
   <div class="max-w-7xl mx-auto flex justify-between p-4">
     <div>
-      <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
-      <span class="text-[10px] font-bold tracking-[0.2em] text-green-700">BID. WIN. DRIVE.</span>
+      <h1 class="text-3xl font-black text-[var(--brand)]">BidUp</h1>
+      <span class="text-[11px] font-bold tracking-[0.35em] text-green-700 uppercase">BID. WIN. DRIVE.</span>
+      <div class="text-[10px] text-slate-500">Zimbabwe Vehicle Auctions</div>
     </div>
 
     <div class="flex gap-2">
@@ -44,17 +45,39 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
   <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">Rules</button>
 </div>
 
-<!-- HERO -->
-<section class="pt-28 bg-gradient-to-br from-green-700 to-emerald-600 text-white">
-  <div class="max-w-7xl mx-auto px-6 py-20">
-    <h1 class="text-8xl font-black">Zimbabwe's trusted online vehicle auctions</h1>
-    <p class="mt-3 text-lg max-w-2xl">
-      Buy and sell vehicles under 10 years old. Verified compliance system.
-    </p>
-  </div>
+
+<!-- HOME -->
+<section id="tab-home" class="pt-28">
+<div class="bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 text-white">
+<div class="max-w-7xl mx-auto px-6 py-20">
+<div class="text-sm font-black tracking-[0.4em] text-green-100">BID. WIN. DRIVE.</div>
+<h1 class="text-5xl md:text-7xl font-black mt-4">Zimbabwe's trusted online vehicle auctions</h1>
+<p class="mt-5 text-xl max-w-2xl">Buy and sell quality vehicles through a secure, transparent and compliant auction marketplace.</p>
+<div class="flex flex-wrap gap-4 mt-8">
+<button onclick="showTab('auctions')" class="bg-white text-green-800 px-7 py-4 rounded-xl font-bold">Browse Live Auctions</button>
+<button onclick="showTab('create')" class="border-2 border-white px-7 py-4 rounded-xl font-bold">Sell Your Vehicle</button>
+</div>
+</div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 py-12">
+<div class="grid md:grid-cols-4 gap-6 mb-12">
+<div class="bg-white border rounded-2xl p-6 text-center"><div class="text-3xl font-black text-green-700">500+</div><div>Vehicles Sold</div></div>
+<div class="bg-white border rounded-2xl p-6 text-center"><div class="text-3xl font-black text-green-700">98%</div><div>Successful Transfers</div></div>
+<div class="bg-white border rounded-2xl p-6 text-center"><div class="text-3xl font-black text-green-700">24/7</div><div>Online Bidding</div></div>
+<div class="bg-white border rounded-2xl p-6 text-center"><div class="text-3xl font-black text-green-700">100%</div><div>Verified Listings</div></div>
+</div>
+<h2 class="text-4xl font-black mb-8">Featured Vehicles</h2>
+<div class="grid md:grid-cols-3 gap-6">
+<div class="bg-white border rounded-2xl p-5"><h3 class="font-bold">2022 Toyota Hilux</h3><p>Current Bid: $18,500</p></div>
+<div class="bg-white border rounded-2xl p-5"><h3 class="font-bold">2021 Ford Ranger</h3><p>Current Bid: $21,000</p></div>
+<div class="bg-white border rounded-2xl p-5"><h3 class="font-bold">2023 VW Polo</h3><p>Current Bid: $14,200</p></div>
+</div>
+</div>
 </section>
 
 <!-- AUCTIONS -->
+
 <section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
   <h3 class="text-2xl font-bold">Live Auctions</h3>
 </section>
@@ -270,9 +293,188 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
   <div class="bg-white p-6 rounded w-80">
     <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
     <input id="password" type="password" class="border p-2 w-full mb-2" placeholder="Password">
-    <button onclick="login()" class="bg-green-600 text-white w-full p-2">Register to Bid</button>
+    <button onclick="login()" class="bg-green-600 text-white w-full p-2">Login</button>
   </div>
 </div>
+
+  <footer class="bg-slate-950 text-white mt-20 border-t border-slate-800">
+
+  <div class="max-w-7xl mx-auto px-6 py-16">
+
+    <div class="grid lg:grid-cols-4 gap-10">
+
+      <!-- BRAND -->
+      <div>
+        <h3 class="text-4xl font-black text-green-400">
+          BidUp
+        </h3>
+
+        <p class="text-xs tracking-[0.35em] text-green-300 mt-2">
+          BID. WIN. DRIVE.
+        </p>
+
+        <p class="text-slate-400 mt-5 leading-relaxed">
+          Zimbabwe's trusted online vehicle auction marketplace.
+          Secure bidding, verified sellers and transparent vehicle sales.
+        </p>
+      </div>
+
+      <!-- MARKETPLACE -->
+      <div>
+        <h4 class="font-bold text-lg mb-4">
+          Marketplace
+        </h4>
+
+        <ul class="space-y-3 text-slate-400">
+
+          <li>
+            <a href="#" onclick="showTab('home')" class="hover:text-green-400">
+              Home
+            </a>
+          </li>
+
+          <li>
+            <a href="#" onclick="showTab('auctions')" class="hover:text-green-400">
+              Live Auctions
+            </a>
+          </li>
+
+          <li>
+            <a href="#" onclick="showTab('create')" class="hover:text-green-400">
+              Sell Your Vehicle
+            </a>
+          </li>
+
+          <li>
+            <a href="#" onclick="toggleAuth(true)" class="hover:text-green-400">
+              Register to Bid
+            </a>
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- LEGAL -->
+      <div>
+        <h4 class="font-bold text-lg mb-4">
+          Legal & Compliance
+        </h4>
+
+        <ul class="space-y-3 text-slate-400">
+
+          <li>
+            <a href="#" onclick="showTab('rules')" class="hover:text-green-400">
+              Auction Rules
+            </a>
+          </li>
+
+          <li>
+            Consumer Protection Compliance
+          </li>
+
+          <li>
+            Seller Verification
+          </li>
+
+          <li>
+            Vehicle Transfer Requirements
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- TRUST -->
+      <div>
+        <h4 class="font-bold text-lg mb-4">
+          Why BidUp?
+        </h4>
+
+        <ul class="space-y-3 text-slate-400">
+
+          <li>✓ Verified Sellers</li>
+
+          <li>✓ Secure Online Bidding</li>
+
+          <li>✓ Compliance Checked Listings</li>
+
+          <li>✓ Transparent Auction Process</li>
+
+          <li>✓ Zimbabwe Focused Marketplace</li>
+
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- TRUST BAR -->
+    <div class="grid md:grid-cols-4 gap-4 mt-14">
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-green-400">
+          500+
+        </div>
+        <div class="text-sm text-slate-400">
+          Vehicles Sold
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-green-400">
+          98%
+        </div>
+        <div class="text-sm text-slate-400">
+          Successful Transfers
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-green-400">
+          24/7
+        </div>
+        <div class="text-sm text-slate-400">
+          Online Bidding
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-black text-green-400">
+          100%
+        </div>
+        <div class="text-sm text-slate-400">
+          Verified Listings
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="border-t border-slate-800 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+
+      <p class="text-slate-500 text-sm">
+        © 2026 BidUp Marketplace. All rights reserved.
+      </p>
+
+      <div class="flex gap-6 text-sm text-slate-500">
+
+        <a href="#" onclick="showTab('rules')" class="hover:text-green-400">
+          Terms
+        </a>
+
+        <a href="#" class="hover:text-green-400">
+          Privacy
+        </a>
+
+        <a href="#" class="hover:text-green-400">
+          Support
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</footer>
 
 <script>
 
@@ -361,16 +563,5 @@ function logout(){
 
 </script>
 
-
-<footer class="bg-slate-900 text-white mt-20">
-<div class="max-w-7xl mx-auto px-6 py-10">
-<div class="grid md:grid-cols-5 gap-4">
-<a href="#" onclick="showTab('home')">Home</a>
-<a href="#" onclick="showTab('auctions')">Live Auctions</a>
-<a href="#" onclick="showTab('create')">Sell Vehicle</a>
-<a href="#" onclick="showTab('dashboard')">Dashboard</a>
-<a href="#" onclick="showTab('rules')">Rules</a>
-</div>
-</div>
-</footer>
-</body></html>
+</body>
+</html>
