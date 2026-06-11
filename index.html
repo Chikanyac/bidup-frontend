@@ -50,15 +50,12 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
 </section>
 
 <script>
-/* =========================
-   SOCKET CONNECTION
-========================= */
 const socket = io("https://api.bidup.co.zw", {
-  transports: ["polling", "websocket"]
+  transports: ["polling"]
 });
 
 /* =========================
-   AUCTION STATE
+   SAFE AUCTION STATE
 ========================= */
 let auctionState = {
   1: { title: "Toyota Hilux 2019", bid: 18500 },
@@ -66,14 +63,17 @@ let auctionState = {
   3: { title: "Mazda CX-5 2018", bid: 14200 }
 };
 
+let socketConnected = false;
+
 /* =========================
-   RENDER AUCTIONS
+   RENDER (SAFE)
 ========================= */
 function renderAuctions() {
   const grid = document.getElementById("auctionGrid");
+  if (!grid) return;
 
   grid.innerHTML = Object.entries(auctionState).map(([id, car]) => `
-    <div id="car-${id}" class="bg-white border rounded-xl p-4 shadow-sm transition">
+    <div id="car-${id}" class="bg-white border rounded-xl p-4 shadow-sm">
       <h3 class="font-bold text-lg">${car.title}</h3>
 
       <p class="text-sm text-slate-500 mt-1">Live auction</p>
@@ -93,7 +93,7 @@ function renderAuctions() {
 }
 
 /* =========================
-   LIVE BID UPDATE HANDLER
+   SAFE UPDATE
 ========================= */
 function updateBid(id, newBid) {
   if (!auctionState[id]) return;
@@ -101,50 +101,64 @@ function updateBid(id, newBid) {
   auctionState[id].bid = newBid;
 
   const el = document.getElementById(`bid-${id}`);
-  if (el) {
-    el.textContent = "$" + newBid.toLocaleString();
-    el.classList.add("bid-flash");
-    setTimeout(() => el.classList.remove("bid-flash"), 600);
-  }
+  if (!el) return;
+
+  el.textContent = "$" + newBid.toLocaleString();
+  el.classList.add("bid-flash");
+
+  setTimeout(() => el.classList.remove("bid-flash"), 500);
 }
 
 /* =========================
-   SOCKET EVENTS (REAL BACKEND READY)
+   SOCKET
 ========================= */
 socket.on("connect", () => {
-  console.log("Connected to auction server");
+  socketConnected = true;
+  console.log("Socket connected");
 });
 
 socket.on("auction:update", (data) => {
-  // expected: { id, bid }
   updateBid(data.id, data.bid);
 });
 
 /* =========================
-   SIMULATED LIVE UPDATES (DEMO MODE)
-   REMOVE WHEN BACKEND IS READY
+   ONLY RUN SIMULATION IF NO SOCKET DATA FLOW
 ========================= */
-setInterval(() => {
-  const randomId = [1,2,3][Math.floor(Math.random()*3)];
-  const increase = Math.floor(Math.random() * 300 + 50);
+function startDemoBidding() {
+  if (socketConnected) return;
 
-  auctionState[randomId].bid += increase;
+  setInterval(() => {
+    const ids = Object.keys(auctionState);
+    const randomId = ids[Math.floor(Math.random() * ids.length)];
 
-  updateBid(randomId, auctionState[randomId].bid);
+    auctionState[randomId].bid += Math.floor(Math.random() * 250 + 50);
+    updateBid(randomId, auctionState[randomId].bid);
 
-}, 4000);
-
-/* =========================
-   TAB SYSTEM
-========================= */
-function showTab(tab) {
-  document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
-  document.getElementById("tab-" + tab).classList.remove("hidden");
+  }, 4000);
 }
 
-/* INIT */
+/* =========================
+   TAB SYSTEM (SAFE)
+========================= */
+function showTab(tab) {
+  document.querySelectorAll("section[id^='tab']").forEach(s => {
+    if (s) s.classList.add("hidden");
+  });
+
+  const target = document.getElementById("tab-" + tab);
+  if (target) target.classList.remove("hidden");
+
+  if (tab === "home") {
+    renderAuctions();
+  }
+}
+
+/* =========================
+   INIT (CRITICAL FIX)
+========================= */
 window.addEventListener("DOMContentLoaded", () => {
   renderAuctions();
+  startDemoBidding();
   showTab("home");
 });
 </script>
