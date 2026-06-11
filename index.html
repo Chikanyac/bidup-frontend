@@ -78,9 +78,69 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
 
 <!-- AUCTIONS -->
 
+
+<!-- AUCTIONS -->
 <section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold">Live Auctions</h3>
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+    <div>
+      <h3 class="text-3xl font-black">Live Auctions</h3>
+      <p class="text-slate-500 text-sm mt-1">Real-time bidding • Auto-extend 2min • ZIMRA verified</p>
+    </div>
+    <div class="flex gap-2">
+      <select id="filterLocation" class="border rounded-lg px-3 py-2 text-sm bg-white">
+        <option>All Locations</option>
+        <option>Harare</option>
+        <option>Bulawayo</option>
+        <option>Beitbridge</option>
+      </select>
+      <select id="filterStatus" class="border rounded-lg px-3 py-2 text-sm bg-white">
+        <option>Ending Soon</option>
+        <option>No Reserve</option>
+        <option>ZIMRA Cleared</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="liveAuctionsGrid" class="grid md:grid-cols-3 gap-6"></div>
+
+  <!-- Auction Detail + Bid History -->
+  <div id="auctionDetail" class="hidden mt-10 bg-white border rounded-2xl p-6">
+    <div class="grid lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <div class="flex justify-between items-start">
+          <div>
+            <h4 id="detailTitle" class="text-2xl font-bold"></h4>
+            <p id="detailMeta" class="text-sm text-slate-500"></p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs uppercase text-slate-500">Time Left</div>
+            <div id="detailTimer" class="text-3xl font-black text-green-700">00:00</div>
+          </div>
+        </div>
+        <img id="detailImage" src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800" class="w-full h-72 object-cover rounded-xl mt-4 border">
+        <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+          <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">Current Bid</div><div id="detailPrice" class="text-xl font-bold">$0</div></div>
+          <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">Bids</div><div id="detailBids" class="text-xl font-bold">0</div></div>
+          <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">Watchers</div><div id="detailWatchers" class="text-xl font-bold">0</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="bg-slate-900 text-white rounded-xl p-4">
+          <div class="text-sm uppercase tracking-wide text-green-300">Place Your Bid</div>
+          <div class="mt-2 text-2xl font-black" id="detailNextBid">$0</div>
+          <button onclick="openBidModal()" class="w-full bg-green-600 hover:bg-green-500 mt-4 py-3 rounded-lg font-bold">BID NOW</button>
+          <button onclick="setProxyBid()" class="w-full border border-slate-700 mt-2 py-2 rounded-lg text-sm">Set Max (Proxy) Bid</button>
+          <p class="text-[11px] text-slate-400 mt-3">By bidding you accept CPA auction waiver & 24hr payment rule. EcoCash/Paynow accepted.</p>
+        </div>
+        <div class="mt-4">
+          <h5 class="font-bold mb-2 text-sm uppercase">Live Bid History</h5>
+          <div id="bidHistory" class="bg-white border rounded-lg h-56 overflow-y-auto text-sm divide-y"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+
 
 <!-- SELL CAR -->
 <section id="tab-create" class="hidden max-w-5xl mx-auto px-6 py-10">
@@ -127,6 +187,33 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
 </div>
 
 </section>
+
+
+<!-- DASHBOARD -->
+<section id="tab-dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
+  <h3 class="text-3xl font-black mb-6">My Bidding Dashboard</h3>
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white border rounded-2xl p-5">
+      <div class="text-sm text-slate-500">Active Bids</div>
+      <div id="dashActive" class="text-3xl font-black text-green-700 mt-1">0</div>
+    </div>
+    <div class="bg-white border rounded-2xl p-5">
+      <div class="text-sm text-slate-500">Winning</div>
+      <div id="dashWinning" class="text-3xl font-black text-green-700 mt-1">0</div>
+    </div>
+    <div class="bg-white border rounded-2xl p-5">
+      <div class="text-sm text-slate-500">Outbid</div>
+      <div id="dashOutbid" class="text-3xl font-black text-red-600 mt-1">0</div>
+    </div>
+  </div>
+  <div class="mt-8 bg-white border rounded-2xl p-5">
+    <h4 class="font-bold mb-3">Watchlist & Recent Activity</h4>
+    <div id="dashActivity" class="text-sm text-slate-600 space-y-2">
+      <p>No activity yet. Join a live auction to start.</p>
+    </div>
+  </div>
+</section>
+
 
 <!-- RULES -->
 <section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
@@ -562,6 +649,40 @@ function logout(){
 }
 
 </script>
+
+
+<!-- BID MODAL -->
+<div id="bidModal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6">
+    <div class="flex justify-between items-start">
+      <h3 class="text-xl font-bold">Confirm Bid</h3>
+      <button onclick="closeBidModal()" class="text-slate-500">✕</button>
+    </div>
+    <p id="bidModalVehicle" class="text-sm text-slate-600 mt-1"></p>
+    <div class="mt-4 bg-slate-50 rounded-xl p-4">
+      <div class="flex justify-between"><span class="text-sm">Current</span><span id="bidModalCurrent" class="font-bold"></span></div>
+      <div class="flex justify-between mt-1"><span class="text-sm">Your bid</span><span id="bidModalYour" class="font-black text-green-700 text-xl"></span></div>
+      <div class="flex justify-between mt-1"><span class="text-xs text-slate-500">Next minimum</span><span id="bidModalMin" class="text-xs"></span></div>
+    </div>
+    <label class="flex items-start gap-2 mt-4 text-xs">
+      <input type="checkbox" id="bidAccept" class="mt-0.5">
+      <span>I accept the auction rules, CPA waiver, and understand payment is due within 24hrs via EcoCash/Paynow/bank.</span>
+    </label>
+    <button id="confirmBidBtn" onclick="submitBid()" disabled class="w-full bg-slate-300 text-white mt-4 py-3 rounded-lg font-bold">Accept terms to bid</button>
+    <p class="text-[10px] text-slate-400 text-center mt-2">ZIMRA duties & transfer fees are buyer responsibility</p>
+  </div>
+</div>
+
+<!-- MOBILE BID BAR -->
+<div id="mobileBidBar" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-2xl p-3 z-40 hidden">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="text-[11px] text-slate-500 uppercase">Current</div>
+      <div id="mobilePrice" class="text-lg font-black">$0</div>
+    </div>
+    <button onclick="openBidModal()" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold">BID NOW</button>
+  </div>
+</div>
 
 </body>
 </html>
