@@ -7,7 +7,7 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -340,36 +340,25 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function updateSellerUI() {
-  const accepted = localStorage.getItem(SELLER_TERMS) === "true";
+function downloadRulesPDF() {
+  const accepted = localStorage.getItem("bidup_terms_accepted") === "true";
 
-  const checklist = document.getElementById("sellerChecklist");
-  const pdfBtn = document.getElementById("sellerPdfBtn");
-  const printBtn = document.getElementById("sellerPrintBtn");
-
-  if (checklist) {
-    checklist.classList.toggle("opacity-50", !accepted);
-    checklist.classList.toggle("pointer-events-none", !accepted);
+  if (!accepted) {
+    return alert("You must accept Terms before downloading the Rules PDF.");
   }
 
-  if (pdfBtn) pdfBtn.disabled = !accepted;
-  if (printBtn) printBtn.disabled = !accepted;
-}
+  const element = document.querySelector("#tab-rules");
 
-function printSellerPDF() {
-  if (localStorage.getItem(SELLER_TERMS) !== "true") {
-    return alert("Accept seller terms first.");
-  }
-  window.print();
-}
+  const opt = {
+    margin: 0.5,
+    filename: "BidUp-Rules-of-Auction.pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+  };
 
-function downloadSellerPDF() {
-  if (localStorage.getItem(SELLER_TERMS) !== "true") {
-    return alert("Accept seller terms first.");
-  }
-  window.print();
+  html2pdf().set(opt).from(element).save();
 }
-  const TERMS_KEY = "bidup_terms_accepted";
 
 // restore state
 window.addEventListener("DOMContentLoaded", () => {
