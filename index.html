@@ -240,149 +240,69 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 <!-- RULES -->
 <section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
 
-  <h3 class="text-2xl font-bold mb-6">
-    Rules of Auction (Zimbabwe - Timed Online Vehicle Auctions)
+  <h3 class="text-2xl font-bold mb-4">
+    Rules of Auction & Legal Terms
   </h3>
 
-  <!-- DISCLAIMER -->
+  <!-- LEGAL NOTICE -->
   <div class="border-2 border-black p-4 mb-6 bg-white">
-    <p class="text-xs font-bold uppercase mb-2">Important Notice</p>
+    <p class="text-xs font-bold uppercase mb-2">Legal Notice</p>
     <p class="text-sm">
-      This template is based on Zimbabwe's Consumer Protection Act [Chapter 14:14] (2019),
-      ZIMRA vehicle transfer requirements, and Statutory Instrument 59 of 2026.
-      It is not legal advice. Auctions may require cooling-off exemptions.
+      By using BidUp, you agree to Zimbabwe Consumer Protection Act [Chapter 14:14],
+      ZIMRA vehicle transfer requirements, and SI 59 of 2026. This is a binding agreement
+      between the user and the platform operator.
     </p>
   </div>
 
-  <!-- 1 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">1. Definitions</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Auctioneer</li>
-      <li>Platform</li>
-      <li>Buyer</li>
-      <li>Seller</li>
-      <li>Lot</li>
-      <li>Reserve</li>
-      <li>Fall of Hammer = automatic close time</li>
-      <li>CVR4</li>
-      <li>Special Excise Duty</li>
-    </ul>
+  <!-- ACTION BOX -->
+  <div class="bg-white border rounded-xl p-5 mb-6 shadow-sm">
+
+    <div class="flex flex-col gap-3">
+
+      <!-- ACCEPT TERMS -->
+      <label class="flex items-start gap-3 text-sm">
+        <input id="acceptTerms" type="checkbox" class="mt-1">
+        <span>
+          I confirm that I have read, understood, and agree to the Auction Rules,
+          Legal Terms, and Cooling-Off Policy.
+        </span>
+      </label>
+
+      <!-- BUTTONS -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-2">
+
+        <button onclick="downloadRulesPDF()"
+          class="bg-slate-900 text-white px-4 py-2 rounded disabled:opacity-40"
+          id="pdfBtn">
+
+          Download Rules PDF
+        </button>
+
+        <button onclick="printRulesPDF()"
+          class="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-40"
+          id="printBtn">
+
+          Print / Save as PDF
+        </button>
+
+      </div>
+
+      <p class="text-xs text-slate-500 mt-2">
+        You must accept terms before downloading official PDF.
+      </p>
+
+    </div>
   </div>
 
-  <!-- 2 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">2. Legal Framework</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Consumer Protection Act Chapter 14:14 applies</li>
-      <li>7-day cooling-off may apply unless waived for auction sales</li>
-      <li>Vehicle transfer must be completed within 14 days</li>
-    </ul>
-  </div>
-
-  <!-- 3 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">3. Registration</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Must be 18+ with valid ID/passport</li>
-      <li>Proof of residence required</li>
-      <li>Refundable bidding deposit may apply</li>
-      <li>One account per user</li>
-    </ul>
-  </div>
-
-  <!-- 4 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">4. Vehicle Eligibility</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>No vehicles older than 10 years unless exempt</li>
-      <li>Seller must confirm legal ownership or exemption</li>
-    </ul>
-  </div>
-
-  <!-- 5 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">5. Auction Format</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Timed online auctions</li>
-      <li>Auto-extend in final 2 minutes</li>
-      <li>Viewing available at designated locations</li>
-    </ul>
-  </div>
-
-  <!-- 6 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">6. Reserve & Bidding</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Reserve may be undisclosed</li>
-      <li>Highest bid at close wins subject to reserve</li>
-    </ul>
-  </div>
-
-  <!-- 7 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">7. Payments & Fees</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Payment within 24 hours</li>
-      <li>Buyer pays taxes & duties (ZIMRA)</li>
-      <li>Documentation fee may apply</li>
-    </ul>
-  </div>
-
-  <!-- 8 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">8. Ownership Transfer</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Transfer must be completed within 14 days</li>
-      <li>Seller provides registration book + CVR4 + ID docs</li>
-      <li>Buyer provides ID & proof of residence</li>
-    </ul>
-  </div>
-
-  <!-- 9 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">9. Risk & Delivery</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Risk passes on fall of hammer</li>
-      <li>Collection within 72 hours</li>
-      <li>Sold as-is condition</li>
-    </ul>
-  </div>
-
-  <!-- 10 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">10. Consumer Rights</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Cooling-off may apply under CPA</li>
-      <li>Auction exemption may require waiver</li>
-      <li>Return rules depend on legal classification</li>
-    </ul>
-  </div>
-
-  <!-- 11 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">11. Default</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Non-payment leads to forfeiture of deposit</li>
-      <li>Vehicle may be re-auctioned</li>
-    </ul>
-  </div>
-
-  <!-- 12 -->
-  <div class="bg-white p-5 border rounded-xl mb-4">
-    <h4 class="font-bold mb-2">12. Privacy</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Data processed under Zimbabwe Data Protection Act</li>
-      <li>Marketing opt-out available</li>
-    </ul>
-  </div>
-
-  <!-- 13 -->
-  <div class="bg-white p-5 border rounded-xl">
-    <h4 class="font-bold mb-2">13. Governing Law</h4>
-    <ul class="list-disc ml-5 text-sm space-y-1">
-      <li>Laws of Zimbabwe</li>
-      <li>Jurisdiction: Harare courts</li>
+  <!-- RULES SUMMARY (short version for UI only) -->
+  <div class="bg-white p-5 border rounded-xl text-sm space-y-2">
+    <p><b>Key Legal Summary:</b></p>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>All bids are binding once auction closes</li>
+      <li>Payment required within 24 hours</li>
+      <li>Ownership transfer within 14 days (ZIMRA)</li>
+      <li>Vehicles sold “as-is” unless stated</li>
+      <li>Cooling-off rights may be waived for auctions</li>
     </ul>
   </div>
 
@@ -408,6 +328,54 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 </footer>
 
 <script>
+  const TERMS_KEY = "bidup_terms_accepted";
+
+// restore state
+window.addEventListener("DOMContentLoaded", () => {
+  const accepted = localStorage.getItem(TERMS_KEY) === "true";
+  const cb = document.getElementById("acceptTerms");
+
+  if (cb) {
+    cb.checked = accepted;
+    updateLegalUI();
+    cb.addEventListener("change", () => {
+      localStorage.setItem(TERMS_KEY, cb.checked);
+      updateLegalUI();
+    });
+  }
+});
+
+function updateLegalUI() {
+  const accepted = localStorage.getItem(TERMS_KEY) === "true";
+
+  const pdfBtn = document.getElementById("pdfBtn");
+  const printBtn = document.getElementById("printBtn");
+
+  if (!pdfBtn || !printBtn) return;
+
+  pdfBtn.disabled = !accepted;
+  printBtn.disabled = !accepted;
+}
+
+// Print fallback (simple PDF)
+function printRulesPDF() {
+  const accepted = localStorage.getItem(TERMS_KEY) === "true";
+  if (!accepted) return alert("You must accept terms first.");
+
+  window.print();
+}
+
+// “Download PDF” (future backend hook-ready)
+function downloadRulesPDF() {
+  const accepted = localStorage.getItem(TERMS_KEY) === "true";
+  if (!accepted) return alert("You must accept terms first.");
+
+  // Option A (frontend fallback)
+  window.print();
+
+  // Option B (future API hook)
+  // fetch("/api/legal/rules/pdf")
+}
 const socket = io("https://api.bidup.co.zw", { transports: ["polling"] });
 
 let currentUser = JSON.parse(localStorage.getItem("user"));
