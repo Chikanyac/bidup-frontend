@@ -8,13 +8,12 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --brand:#0a7c5a;
-}
-body{font-family:Outfit, sans-serif; background:#f8fafc;}
+:root{ --brand:#0a7c5a; }
+body{font-family:Outfit,sans-serif;background:#f8fafc;}
 .glass{backdrop-filter:blur(12px);}
 </style>
 </head>
@@ -23,42 +22,34 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 
 <!-- HEADER -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 glass border-b">
-  <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
-
+  <div class="max-w-7xl mx-auto flex justify-between p-4">
     <div>
       <h1 class="text-2xl font-black text-[var(--brand)]">BidUp</h1>
-      <span class="text-[10px] font-bold tracking-[0.2em] text-green-700">
-        BID. WIN. DRIVE.
-      </span>
+      <span class="text-[10px] font-bold tracking-[0.2em] text-green-700">BID. WIN. DRIVE.</span>
     </div>
 
     <div class="flex gap-2">
       <button id="loginBtn" onclick="toggleAuth(true)" class="bg-green-600 text-white px-4 py-2 rounded">Login</button>
       <button id="logoutBtn" onclick="logout()" class="hidden bg-red-500 text-white px-4 py-2 rounded">Logout</button>
     </div>
-
   </div>
 </header>
 
-<!-- NAV (PUBLIC - ALWAYS VISIBLE) -->
-<div id="dashboardNav" class="max-w-7xl mx-auto mt-24 px-6 flex flex-wrap gap-2">
-
+<!-- NAV (PUBLIC) -->
+<div id="dashboardNav" class="max-w-7xl mx-auto mt-24 px-6 flex gap-2">
   <button onclick="showTab('home')" class="bg-green-600 text-white px-3 py-2 rounded">Home</button>
   <button onclick="showTab('auctions')" class="bg-slate-800 text-white px-3 py-2 rounded">Auctions</button>
   <button onclick="showTab('create')" class="bg-slate-700 text-white px-3 py-2 rounded">Sell Car</button>
   <button onclick="showTab('dashboard')" class="bg-slate-600 text-white px-3 py-2 rounded">Dashboard</button>
   <button onclick="showTab('rules')" class="bg-black text-white px-3 py-2 rounded">Rules</button>
-
 </div>
 
 <!-- HERO -->
 <section class="pt-28 bg-gradient-to-br from-green-700 to-emerald-600 text-white">
   <div class="max-w-7xl mx-auto px-6 py-20">
-    <h1 class="text-4xl font-black">
-      Zimbabwe's trusted online vehicle auctions
-    </h1>
+    <h1 class="text-4xl font-black">Zimbabwe's trusted online vehicle auctions</h1>
     <p class="mt-3 text-lg max-w-2xl">
-      Buy and sell vehicles under 10 years old. Every listing is verified for ZIMRA duty, ownership, and compliance.
+      Buy and sell vehicles under 10 years old. Verified compliance system.
     </p>
   </div>
 </section>
@@ -66,399 +57,182 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 <!-- HOME -->
 <section id="tab-home" class="max-w-7xl mx-auto px-6 py-10">
   <h3 class="text-2xl font-bold mb-4">Featured Vehicles</h3>
-  <div id="auctionGrid" class="grid md:grid-cols-3 gap-6"></div>
 </section>
 
 <!-- AUCTIONS -->
 <section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold mb-4">Live Auctions</h3>
+  <h3 class="text-2xl font-bold">Live Auctions</h3>
 </section>
 
+<!-- SELL CAR -->
 <section id="tab-create" class="hidden max-w-5xl mx-auto px-6 py-10">
 
-  <h3 class="text-2xl font-bold mb-4">
-    Sell Your Car - Seller Onboarding Checklist
-  </h3>
+<h3 class="text-2xl font-bold mb-4">Sell Your Car - Onboarding</h3>
 
-  <!-- LEGAL AGREEMENT BOX -->
-  <div class="bg-white border-2 border-black rounded-xl p-5 mb-6">
+<!-- LEGAL BOX -->
+<div class="bg-white border-2 border-black p-5 mb-6 rounded-xl">
 
-    <p class="text-xs font-bold uppercase mb-2">
-      Seller Legal Agreement
-    </p>
+  <p class="text-xs font-bold uppercase mb-2">Legal Agreement</p>
 
-    <p class="text-sm mb-4">
-      By submitting a vehicle, you confirm that all information is accurate,
-      you are the legal owner or authorized agent, and you agree to ZIMRA,
-      CPA, and BidUp auction rules including 14-day transfer compliance.
-    </p>
+  <p class="text-sm mb-4">
+    By submitting, you agree to BidUp Auction Rules, CPA, ZIMRA compliance, and ownership warranty.
+  </p>
 
-    <label class="flex items-start gap-3 text-sm mb-3">
-      <input id="acceptSellerTerms" type="checkbox" class="mt-1">
-      <span>
-        I agree to the Seller Terms, legal responsibility, and listing verification requirements.
-      </span>
-    </label>
+  <label class="flex gap-2 text-sm mb-3">
+    <input id="acceptSellerTerms" type="checkbox">
+    I accept Seller Legal Terms
+  </label>
 
-    <div class="flex gap-3">
-      <button onclick="downloadSellerPDF()"
-        id="sellerPdfBtn"
-        class="bg-slate-900 text-white px-4 py-2 rounded disabled:opacity-40">
-        Download Seller Pack PDF
-      </button>
+  <button onclick="downloadSellerPDF()" class="bg-black text-white px-4 py-2 rounded disabled:opacity-40" id="sellerPdfBtn">
+    Download Seller PDF
+  </button>
 
-      <button onclick="printSellerPDF()"
-        id="sellerPrintBtn"
-        class="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-40">
-        Print / Save PDF
-      </button>
-    </div>
+</div>
 
-    <p class="text-xs text-slate-500 mt-2">
-      You must accept terms before proceeding.
-    </p>
+<!-- FORM -->
+<div id="sellerForm" class="opacity-50 pointer-events-none">
 
+  <div class="grid md:grid-cols-4 gap-3 bg-white p-5 rounded-xl border mb-6">
+    <input placeholder="Seller Name">
+    <input placeholder="Vehicle">
+    <input placeholder="Reg No">
+    <input type="date">
   </div>
 
-  <!-- FORM -->
-  <div id="sellerForm">
-
-    <!-- BASIC INFO -->
-    <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-        <input placeholder="Seller Name" data-key="seller"
-          class="border-b py-1 outline-none">
-
-        <input placeholder="Vehicle" data-key="vehicle"
-          class="border-b py-1 outline-none">
-
-        <input placeholder="Reg No" data-key="reg"
-          class="border-b py-1 outline-none">
-
-        <input type="date" data-key="date"
-          class="border-b py-1 outline-none">
-
-      </div>
-    </div>
-
-    <!-- CHECKLIST -->
-    <div class="grid md:grid-cols-2 gap-6 opacity-50 pointer-events-none" id="sellerChecklist">
-
-      <!-- 1 -->
-      <div class="bg-white rounded-xl border p-5 shadow-sm">
-        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
-          1. SELLER VERIFICATION
-        </h4>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>ID / Passport</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Proof of residence</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Company docs</span></label>
-        <label class="flex gap-2"><input type="checkbox"><span>Bank details</span></label>
-      </div>
-
-      <!-- 2 -->
-      <div class="bg-white rounded-xl border p-5 shadow-sm">
-        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
-          2. VEHICLE DOCUMENTS
-        </h4>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Registration book</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Police clearance</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>ZINARA disc</span></label>
-        <label class="flex gap-2"><input type="checkbox"><span>Insurance</span></label>
-      </div>
-
-      <!-- 3 -->
-      <div class="bg-white rounded-xl border p-5 shadow-sm">
-        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
-          3. ELIGIBILITY
-        </h4>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>VIN matches</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine matches</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>No outstanding duties</span></label>
-
-        <input type="text" data-key="year"
-          placeholder="Year of manufacture"
-          class="mt-3 w-full border-b py-1 outline-none">
-      </div>
-
-      <!-- 4 -->
-      <div class="bg-white rounded-xl border p-5 shadow-sm">
-        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
-          4. PHOTOS & CONDITION
-        </h4>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Exterior</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Interior</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine bay</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Video</span></label>
-      </div>
-
-      <!-- 5 -->
-      <div class="bg-white rounded-xl border p-5 shadow-sm">
-        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
-          5. PRICING
-        </h4>
-
-        <input type="text" data-key="usd" placeholder="USD Price"
-          class="w-full border-b py-1 mb-2 outline-none">
-
-        <input type="text" data-key="zig" placeholder="ZiG Price"
-          class="w-full border-b py-1 outline-none">
-      </div>
-
-      <!-- 6 -->
-      <div class="bg-white rounded-xl border p-5 shadow-sm">
-        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
-          6. COMPLIANCE
-        </h4>
-
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Legal ownership confirmed</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>No finance owing</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Transfer within 14 days</span></label>
-        <label class="flex gap-2 mb-2"><input type="checkbox"><span>CPA understood</span></label>
-
-        <div class="mt-4 pt-3 border-t text-sm text-slate-600">
-          Seller Signature: ______________________
-        </div>
-      </div>
-
-    </div>
+  <div class="bg-white p-5 rounded-xl border">
+    <h4 class="font-bold mb-3">Checklist Locked Until Terms Accepted</h4>
+    <p class="text-sm text-slate-500">
+      Accept legal terms to enable checklist submission.
+    </p>
   </div>
 
-</section>
-</section>
+</div>
 
-<!-- DASHBOARD -->
-<section id="tab-dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
-  <h3 class="text-2xl font-bold">Dashboard</h3>
 </section>
 
 <!-- RULES -->
 <section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-10">
 
-  <h3 class="text-2xl font-bold mb-4">
-    Rules of Auction & Legal Terms
-  </h3>
+<h3 class="text-2xl font-bold mb-4">Rules of Auction</h3>
 
-  <!-- LEGAL NOTICE -->
-  <div class="border-2 border-black p-4 mb-6 bg-white">
-    <p class="text-xs font-bold uppercase mb-2">Legal Notice</p>
-    <p class="text-sm">
-      By using BidUp, you agree to Zimbabwe Consumer Protection Act [Chapter 14:14],
-      ZIMRA vehicle transfer requirements, and SI 59 of 2026. This is a binding agreement
-      between the user and the platform operator.
-    </p>
-  </div>
+<div id="rulesContent" class="bg-white p-5 border rounded-xl text-sm space-y-2">
 
-  <!-- ACTION BOX -->
-  <div class="bg-white border rounded-xl p-5 mb-6 shadow-sm">
+  <p><b>Legal Notice:</b> By using BidUp you agree to Zimbabwe CPA, ZIMRA rules, SI 59 of 2026.</p>
 
-    <div class="flex flex-col gap-3">
+  <ul class="list-disc ml-5">
+    <li>All bids are binding</li>
+    <li>Payment within 24 hours</li>
+    <li>Transfer within 14 days</li>
+    <li>Vehicles sold as-is</li>
+  </ul>
 
-      <!-- ACCEPT TERMS -->
-      <label class="flex items-start gap-3 text-sm">
-        <input id="acceptTerms" type="checkbox" class="mt-1">
-        <span>
-          I confirm that I have read, understood, and agree to the Auction Rules,
-          Legal Terms, and Cooling-Off Policy.
-        </span>
-      </label>
+</div>
 
-      <!-- BUTTONS -->
-      <div class="flex flex-col sm:flex-row gap-3 mt-2">
+<label class="flex gap-2 mt-4 text-sm">
+  <input id="acceptTerms" type="checkbox">
+  I accept Auction Rules & Legal Terms
+</label>
 
-        <button onclick="downloadRulesPDF()"
-          class="bg-slate-900 text-white px-4 py-2 rounded disabled:opacity-40"
-          id="pdfBtn">
-
-          Download Rules PDF
-        </button>
-
-        <button onclick="printRulesPDF()"
-          class="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-40"
-          id="printBtn">
-
-          Print / Save as PDF
-        </button>
-
-      </div>
-
-      <p class="text-xs text-slate-500 mt-2">
-        You must accept terms before downloading official PDF.
-      </p>
-
-    </div>
-  </div>
-
-  <!-- RULES SUMMARY (short version for UI only) -->
-  <div class="bg-white p-5 border rounded-xl text-sm space-y-2">
-    <p><b>Key Legal Summary:</b></p>
-    <ul class="list-disc ml-5 space-y-1">
-      <li>All bids are binding once auction closes</li>
-      <li>Payment required within 24 hours</li>
-      <li>Ownership transfer within 14 days (ZIMRA)</li>
-      <li>Vehicles sold “as-is” unless stated</li>
-      <li>Cooling-off rights may be waived for auctions</li>
-    </ul>
-  </div>
+<button onclick="downloadRulesPDF()" id="pdfBtn" class="bg-black text-white px-4 py-2 rounded mt-3 disabled:opacity-40">
+  Download Rules PDF
+</button>
 
 </section>
 
 <!-- AUTH -->
 <div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
   <div class="bg-white p-6 rounded w-80">
-    <input id="email" class="w-full border p-2 mb-2" placeholder="Email">
-    <input id="password" type="password" class="w-full border p-2 mb-2" placeholder="Password">
-
-    <button onclick="login()" class="w-full bg-green-600 text-white p-2">Login</button>
-    <button onclick="register()" class="w-full bg-slate-800 text-white p-2 mt-2">Register</button>
-    <button onclick="toggleAuth(false)" class="w-full mt-2 text-sm">Close</button>
+    <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
+    <input id="password" type="password" class="border p-2 w-full mb-2" placeholder="Password">
+    <button onclick="login()" class="bg-green-600 text-white w-full p-2">Login</button>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer class="bg-slate-900 text-white p-10 mt-10">
-  <div class="max-w-6xl mx-auto text-sm">
-    <h3 class="font-bold">BidUp</h3>
-  </div>
-</footer>
-
 <script>
-  const SELLER_TERMS = "bidup_seller_terms";
 
-window.addEventListener("DOMContentLoaded", () => {
-  const cb = document.getElementById("acceptSellerTerms");
-  if (!cb) return;
-
-  const accepted = localStorage.getItem(SELLER_TERMS) === "true";
-  cb.checked = accepted;
-
-  updateSellerUI();
-
-  cb.addEventListener("change", () => {
-    localStorage.setItem(SELLER_TERMS, cb.checked);
-    updateSellerUI();
-  });
-});
-
-function downloadRulesPDF() {
-  const accepted = localStorage.getItem("bidup_terms_accepted") === "true";
-
-  if (!accepted) {
-    return alert("You must accept Terms before downloading the Rules PDF.");
-  }
-
-  const element = document.querySelector("#tab-rules");
-
-  const opt = {
-    margin: 0.5,
-    filename: "BidUp-Rules-of-Auction.pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
-  };
-
-  html2pdf().set(opt).from(element).save();
-}
-
-// restore state
-window.addEventListener("DOMContentLoaded", () => {
-  const accepted = localStorage.getItem(TERMS_KEY) === "true";
-  const cb = document.getElementById("acceptTerms");
-
-  if (cb) {
-    cb.checked = accepted;
-    updateLegalUI();
-    cb.addEventListener("change", () => {
-      localStorage.setItem(TERMS_KEY, cb.checked);
-      updateLegalUI();
-    });
-  }
-});
-
-function updateLegalUI() {
-  const accepted = localStorage.getItem(TERMS_KEY) === "true";
-
-  const pdfBtn = document.getElementById("pdfBtn");
-  const printBtn = document.getElementById("printBtn");
-
-  if (!pdfBtn || !printBtn) return;
-
-  pdfBtn.disabled = !accepted;
-  printBtn.disabled = !accepted;
-}
-
-// Print fallback (simple PDF)
-function printRulesPDF() {
-  const accepted = localStorage.getItem(TERMS_KEY) === "true";
-  if (!accepted) return alert("You must accept terms first.");
-
-  window.print();
-}
-
-// “Download PDF” (future backend hook-ready)
-function downloadRulesPDF() {
-  const accepted = localStorage.getItem(TERMS_KEY) === "true";
-  if (!accepted) return alert("You must accept terms first.");
-
-  // Option A (frontend fallback)
-  window.print();
-
-  // Option B (future API hook)
-  // fetch("/api/legal/rules/pdf")
-}
-const socket = io("https://api.bidup.co.zw", { transports: ["polling"] });
+const TERMS_KEY = "bidup_terms_accepted";
+const SELLER_KEY = "bidup_seller_terms";
 
 let currentUser = JSON.parse(localStorage.getItem("user"));
 
+/* NAV */
 function showTab(tab){
   document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
   document.getElementById("tab-" + tab).classList.remove("hidden");
 }
 
+/* LEGAL STATE */
+function updateLegalUI(){
+  const accepted = localStorage.getItem(TERMS_KEY) === "true";
+
+  document.getElementById("pdfBtn").disabled = !accepted;
+  document.getElementById("sellerForm").classList.toggle("pointer-events-none", !accepted);
+  document.getElementById("sellerForm").classList.toggle("opacity-50", !accepted);
+}
+
+/* SELLER STATE */
+function updateSellerUI(){
+  const accepted = localStorage.getItem(SELLER_KEY) === "true";
+  document.getElementById("sellerPdfBtn").disabled = !accepted;
+}
+
+/* RULES PDF */
+function downloadRulesPDF(){
+  if(localStorage.getItem(TERMS_KEY) !== "true")
+    return alert("Accept terms first");
+
+  html2pdf().from(document.getElementById("rulesContent")).save("BidUp-Rules.pdf");
+}
+
+/* SELLER PDF */
+function downloadSellerPDF(){
+  if(localStorage.getItem(SELLER_KEY) !== "true")
+    return alert("Accept seller terms first");
+
+  html2pdf().from(document.getElementById("sellerForm")).save("BidUp-Seller.pdf");
+}
+
+/* INIT */
+window.addEventListener("DOMContentLoaded", () => {
+
+  const rulesCB = document.getElementById("acceptTerms");
+  const sellerCB = document.getElementById("acceptSellerTerms");
+
+  rulesCB.checked = localStorage.getItem(TERMS_KEY) === "true";
+  sellerCB.checked = localStorage.getItem(SELLER_KEY) === "true";
+
+  rulesCB.onchange = () => {
+    localStorage.setItem(TERMS_KEY, rulesCB.checked);
+    updateLegalUI();
+  };
+
+  sellerCB.onchange = () => {
+    localStorage.setItem(SELLER_KEY, sellerCB.checked);
+    updateSellerUI();
+  };
+
+  updateLegalUI();
+  updateSellerUI();
+
+  showTab("home");
+});
+
+/* AUTH (simplified) */
 function toggleAuth(show){
   document.getElementById("authModal").classList.toggle("hidden", !show);
 }
 
-function updateUI(){
-  if(currentUser){
-    document.getElementById("loginBtn").classList.add("hidden");
-    document.getElementById("logoutBtn").classList.remove("hidden");
-  }
-  showTab("home");
-}
-
-async function login(){
-  const res = await fetch("https://api.bidup.co.zw/api/auth/login", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      email: email.value,
-      password: password.value
-    })
-  });
-
-  const data = await res.json();
-
-  if(data.token){
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    currentUser = data.user;
-
-    toggleAuth(false);
-    updateUI();
-  }
+function login(){
+  localStorage.setItem("user", JSON.stringify({ email: email.value }));
+  currentUser = true;
+  toggleAuth(false);
 }
 
 function logout(){
   localStorage.clear();
-  currentUser = null;
   location.reload();
 }
 
-window.onload = () => {
-  showTab("home");
-  if(currentUser) updateUI();
-};
 </script>
 
 </body>
