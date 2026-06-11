@@ -74,162 +74,157 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
   <h3 class="text-2xl font-bold mb-4">Live Auctions</h3>
 </section>
 
-<!-- SELL CAR -->
-<!-- SELL CAR TAB (REPLACE ONLY THIS SECTION IN YOUR V3) -->
 <section id="tab-create" class="hidden max-w-5xl mx-auto px-6 py-10">
 
-  <!-- Header -->
-  <h3 class="text-2xl font-bold mb-6">Sell Your Car - Seller Onboarding Checklist</h3>
+  <h3 class="text-2xl font-bold mb-4">
+    Sell Your Car - Seller Onboarding Checklist
+  </h3>
 
-  <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <!-- LEGAL AGREEMENT BOX -->
+  <div class="bg-white border-2 border-black rounded-xl p-5 mb-6">
 
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Seller Name</label>
-        <input type="text" data-key="seller"
-          class="mt-1 w-full border-b border-slate-300 focus:border-green-600 outline-none py-1 bg-transparent">
-      </div>
+    <p class="text-xs font-bold uppercase mb-2">
+      Seller Legal Agreement
+    </p>
 
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Vehicle Make & Model</label>
-        <input type="text" data-key="vehicle"
-          class="mt-1 w-full border-b border-slate-300 focus:border-green-600 outline-none py-1 bg-transparent">
-      </div>
+    <p class="text-sm mb-4">
+      By submitting a vehicle, you confirm that all information is accurate,
+      you are the legal owner or authorized agent, and you agree to ZIMRA,
+      CPA, and BidUp auction rules including 14-day transfer compliance.
+    </p>
 
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Registration No.</label>
-        <input type="text" data-key="reg"
-          class="mt-1 w-full border-b border-slate-300 focus:border-green-600 outline-none py-1 bg-transparent">
-      </div>
+    <label class="flex items-start gap-3 text-sm mb-3">
+      <input id="acceptSellerTerms" type="checkbox" class="mt-1">
+      <span>
+        I agree to the Seller Terms, legal responsibility, and listing verification requirements.
+      </span>
+    </label>
 
-      <div>
-        <label class="text-xs font-medium text-slate-500 uppercase">Date Submitted</label>
+    <div class="flex gap-3">
+      <button onclick="downloadSellerPDF()"
+        id="sellerPdfBtn"
+        class="bg-slate-900 text-white px-4 py-2 rounded disabled:opacity-40">
+        Download Seller Pack PDF
+      </button>
+
+      <button onclick="printSellerPDF()"
+        id="sellerPrintBtn"
+        class="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-40">
+        Print / Save PDF
+      </button>
+    </div>
+
+    <p class="text-xs text-slate-500 mt-2">
+      You must accept terms before proceeding.
+    </p>
+
+  </div>
+
+  <!-- FORM -->
+  <div id="sellerForm">
+
+    <!-- BASIC INFO -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <input placeholder="Seller Name" data-key="seller"
+          class="border-b py-1 outline-none">
+
+        <input placeholder="Vehicle" data-key="vehicle"
+          class="border-b py-1 outline-none">
+
+        <input placeholder="Reg No" data-key="reg"
+          class="border-b py-1 outline-none">
+
         <input type="date" data-key="date"
-          class="mt-1 w-full border-b border-slate-300 focus:border-green-600 outline-none py-1 bg-transparent">
+          class="border-b py-1 outline-none">
+
+      </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="grid md:grid-cols-2 gap-6 opacity-50 pointer-events-none" id="sellerChecklist">
+
+      <!-- 1 -->
+      <div class="bg-white rounded-xl border p-5 shadow-sm">
+        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
+          1. SELLER VERIFICATION
+        </h4>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>ID / Passport</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Proof of residence</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Company docs</span></label>
+        <label class="flex gap-2"><input type="checkbox"><span>Bank details</span></label>
+      </div>
+
+      <!-- 2 -->
+      <div class="bg-white rounded-xl border p-5 shadow-sm">
+        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
+          2. VEHICLE DOCUMENTS
+        </h4>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Registration book</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Police clearance</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>ZINARA disc</span></label>
+        <label class="flex gap-2"><input type="checkbox"><span>Insurance</span></label>
+      </div>
+
+      <!-- 3 -->
+      <div class="bg-white rounded-xl border p-5 shadow-sm">
+        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
+          3. ELIGIBILITY
+        </h4>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>VIN matches</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine matches</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>No outstanding duties</span></label>
+
+        <input type="text" data-key="year"
+          placeholder="Year of manufacture"
+          class="mt-3 w-full border-b py-1 outline-none">
+      </div>
+
+      <!-- 4 -->
+      <div class="bg-white rounded-xl border p-5 shadow-sm">
+        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
+          4. PHOTOS & CONDITION
+        </h4>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Exterior</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Interior</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine bay</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Video</span></label>
+      </div>
+
+      <!-- 5 -->
+      <div class="bg-white rounded-xl border p-5 shadow-sm">
+        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
+          5. PRICING
+        </h4>
+
+        <input type="text" data-key="usd" placeholder="USD Price"
+          class="w-full border-b py-1 mb-2 outline-none">
+
+        <input type="text" data-key="zig" placeholder="ZiG Price"
+          class="w-full border-b py-1 outline-none">
+      </div>
+
+      <!-- 6 -->
+      <div class="bg-white rounded-xl border p-5 shadow-sm">
+        <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">
+          6. COMPLIANCE
+        </h4>
+
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Legal ownership confirmed</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>No finance owing</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>Transfer within 14 days</span></label>
+        <label class="flex gap-2 mb-2"><input type="checkbox"><span>CPA understood</span></label>
+
+        <div class="mt-4 pt-3 border-t text-sm text-slate-600">
+          Seller Signature: ______________________
+        </div>
       </div>
 
     </div>
   </div>
 
-  <!-- CHECKLIST GRID -->
-  <div class="grid md:grid-cols-2 gap-6">
-
-    <!-- 1 -->
-    <div class="bg-white rounded-xl border p-5 shadow-sm">
-      <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">1. SELLER VERIFICATION</h4>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>ID / Passport</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Proof of residence</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Company documents (if applicable)</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Bank details for payout</span>
-      </label>
-
-      <label class="flex gap-2">
-        <input type="checkbox"><span>Signed mandate (if applicable)</span>
-      </label>
-    </div>
-
-    <!-- 2 -->
-    <div class="bg-white rounded-xl border p-5 shadow-sm">
-      <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">2. VEHICLE DOCUMENTS</h4>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Registration book (V5)</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Police clearance (CVR4)</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Change of ownership history</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>ZINARA disc</span>
-      </label>
-
-      <label class="flex gap-2">
-        <input type="checkbox"><span>Insurance certificate</span>
-      </label>
-    </div>
-
-    <!-- 3 -->
-    <div class="bg-white rounded-xl border p-5 shadow-sm">
-      <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">3. ELIGIBILITY CHECK</h4>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>VIN matches papers</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Engine number matches</span>
-      </label>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>No outstanding ZIMRA duties</span>
-      </label>
-
-      <div class="mt-3">
-        <input type="text" data-key="year" placeholder="Year of manufacture"
-          class="w-full border-b py-1 outline-none">
-      </div>
-    </div>
-
-    <!-- 4 -->
-    <div class="bg-white rounded-xl border p-5 shadow-sm">
-      <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">4. PHOTOS & CONDITION</h4>
-
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Front & rear photos</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Interior photos</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Engine bay</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Defects</span></label>
-      <label class="flex gap-2"><input type="checkbox"><span>Walkaround video</span></label>
-    </div>
-
-    <!-- 5 -->
-    <div class="bg-white rounded-xl border p-5 shadow-sm">
-      <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">5. PRICING</h4>
-
-      <label class="flex gap-2 mb-2">
-        <input type="checkbox"><span>Reserve price set</span>
-      </label>
-
-      <div class="mt-2">
-        <input type="text" data-key="usd" placeholder="USD price"
-          class="w-full border-b py-1 outline-none mb-2">
-
-        <input type="text" data-key="zig" placeholder="ZiG price"
-          class="w-full border-b py-1 outline-none">
-      </div>
-    </div>
-
-    <!-- 6 -->
-    <div class="bg-white rounded-xl border p-5 shadow-sm">
-      <h4 class="font-bold mb-3 bg-slate-900 text-white px-3 py-2 rounded">6. COMPLIANCE</h4>
-
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Legal ownership confirmed</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>No finance owing</span></label>
-      <label class="flex gap-2 mb-2"><input type="checkbox"><span>Transfer within 14 days</span></label>
-      <label class="flex gap-2"><input type="checkbox"><span>CPA cooling-off understood</span></label>
-
-      <div class="mt-4 pt-3 border-t text-sm text-slate-600">
-        Seller Signature: ______________________
-      </div>
-    </div>
-
-  </div>
-
+</section>
 </section>
 
 <!-- DASHBOARD -->
@@ -328,6 +323,52 @@ body{font-family:Outfit, sans-serif; background:#f8fafc;}
 </footer>
 
 <script>
+  const SELLER_TERMS = "bidup_seller_terms";
+
+window.addEventListener("DOMContentLoaded", () => {
+  const cb = document.getElementById("acceptSellerTerms");
+  if (!cb) return;
+
+  const accepted = localStorage.getItem(SELLER_TERMS) === "true";
+  cb.checked = accepted;
+
+  updateSellerUI();
+
+  cb.addEventListener("change", () => {
+    localStorage.setItem(SELLER_TERMS, cb.checked);
+    updateSellerUI();
+  });
+});
+
+function updateSellerUI() {
+  const accepted = localStorage.getItem(SELLER_TERMS) === "true";
+
+  const checklist = document.getElementById("sellerChecklist");
+  const pdfBtn = document.getElementById("sellerPdfBtn");
+  const printBtn = document.getElementById("sellerPrintBtn");
+
+  if (checklist) {
+    checklist.classList.toggle("opacity-50", !accepted);
+    checklist.classList.toggle("pointer-events-none", !accepted);
+  }
+
+  if (pdfBtn) pdfBtn.disabled = !accepted;
+  if (printBtn) printBtn.disabled = !accepted;
+}
+
+function printSellerPDF() {
+  if (localStorage.getItem(SELLER_TERMS) !== "true") {
+    return alert("Accept seller terms first.");
+  }
+  window.print();
+}
+
+function downloadSellerPDF() {
+  if (localStorage.getItem(SELLER_TERMS) !== "true") {
+    return alert("Accept seller terms first.");
+  }
+  window.print();
+}
   const TERMS_KEY = "bidup_terms_accepted";
 
 // restore state
