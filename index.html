@@ -3,18 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BidUp Marketplace V3.1</title>
+<title>BidUp Marketplace V3.2</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 body { font-family: Outfit, sans-serif; background:#f6f7fb; }
-:root { --brand:#0a7c5a; }
+
 .card { transition:0.2s ease; }
 .card:hover { transform:translateY(-3px); }
+
+:root {
+  --brand:#0a7c5a;
+}
 </style>
 </head>
 
@@ -30,16 +33,32 @@ body { font-family: Outfit, sans-serif; background:#f6f7fb; }
     </div>
 
     <div class="flex gap-2">
-      <button onclick="showTab('buy')" class="px-3 py-2 text-sm bg-green-600 text-white rounded">Buy Cars</button>
-      <button onclick="showTab('sell')" class="px-3 py-2 text-sm bg-gray-800 text-white rounded">Sell Car</button>
+      <button onclick="showTab('buy')" class="px-3 py-2 text-sm bg-green-600 text-white rounded">Buy</button>
+      <button onclick="showTab('sell')" class="px-3 py-2 text-sm bg-gray-800 text-white rounded">Sell</button>
       <button onclick="toggleAuth(true)" class="px-3 py-2 text-sm bg-blue-600 text-white rounded">Login</button>
     </div>
 
   </div>
 </header>
 
+<!-- HERO -->
+<section class="pt-24 bg-gradient-to-br from-green-700 to-emerald-800 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+
+    <h2 class="text-4xl md:text-5xl font-black leading-tight">
+      Zimbabwe's trusted online vehicle auctions
+    </h2>
+
+    <p class="mt-4 text-lg text-green-100 max-w-3xl">
+      Buy and sell vehicles under 10 years old. Every listing is verified for ZIMRA duty, ownership, and age compliance.
+      Bid with confidence — 7-day CPA cooling-off included.
+    </p>
+
+  </div>
+</section>
+
 <!-- FILTERS -->
-<section class="pt-24 max-w-7xl mx-auto px-4">
+<section class="max-w-7xl mx-auto px-4 mt-6">
   <div class="bg-white p-4 rounded shadow flex gap-3 flex-wrap">
     <input placeholder="Make" class="border p-2 rounded">
     <input placeholder="Model" class="border p-2 rounded">
@@ -102,9 +121,10 @@ body { font-family: Outfit, sans-serif; background:#f6f7fb; }
     </div>
 
     <div>
-      <h4 class="font-bold">Support</h4>
-      <p>Help Centre</p>
-      <p>Terms</p>
+      <h4 class="font-bold">Compliance</h4>
+      <p>ZIMRA Verified</p>
+      <p>Ownership Checked</p>
+      <p>7-Day CPA Protection</p>
     </div>
 
     <div>
@@ -120,7 +140,7 @@ body { font-family: Outfit, sans-serif; background:#f6f7fb; }
 let currentUser = null;
 
 /* =====================
-DUMMY CARS (IMPORTANT)
+DUMMY CARS
 ===================== */
 const dummyCars = [
   { _id:"1", title:"Toyota Hilux 2.8 GD6", price:15000, image:"https://source.unsplash.com/400x300/?pickup" },
@@ -129,7 +149,7 @@ const dummyCars = [
 ];
 
 /* =====================
-LOAD GRID
+LOAD CARS
 ===================== */
 function loadCars(){
   const grid = document.getElementById("grid");
@@ -144,7 +164,7 @@ function loadCars(){
       <h3 class="font-bold mt-2">${car.title}</h3>
       <p class="text-green-700 font-bold">$${car.price}</p>
 
-      <button onclick="bid('${car._id}', ${car.price})"
+      <button onclick="bid('${car._id}')"
         class="mt-2 w-full bg-green-600 text-white py-2 rounded">
         Place Bid
       </button>
@@ -190,7 +210,7 @@ async function login(){
 }
 
 /* =====================
-SELL CAR (PENDING)
+SELL CAR
 ===================== */
 async function submitCar(){
   const token = localStorage.getItem("token");
@@ -214,20 +234,20 @@ async function submitCar(){
     })
   });
 
-  alert("Submitted for admin approval");
+  alert("Submitted for approval");
 }
 
 /* =====================
-BID (LOGIN REQUIRED)
+BID
 ===================== */
-function bid(id, price){
+function bid(id){
   if(!localStorage.getItem("token")){
     alert("Login required to bid");
     toggleAuth(true);
     return;
   }
 
-  alert("Bid placed (backend will connect next step)");
+  alert("Bid placed (backend integration next step)");
 }
 
 /* INIT */
