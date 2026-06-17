@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidUp Marketplace - Zimbabwe Vehicle Auctions</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{ --brand:#0a7c5a; --brand-dark:#065f46; }
+body{font-family:Outfit,sans-serif;background:#f8fafc;}
+.glass{backdrop-filter:blur(12px);}
+.pulse-red{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.tab-btn{transition:all 0.2s; white-space:nowrap}
+.tab-btn.active{transform:translateY(-2px); box-shadow:0 4px 12px rgba(10,124,90,0.3)}
+.auth-lock{display:inline-block}
+.logged-in .auth-lock{display:none}
+</style>
+</head>
+
+<body class="text-slate-800">
+
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/90 glass border-b border-slate-200">
+  <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
+    <div class="flex items-center gap-4">
+      <div>
+        <h1 class="text-3xl font-black text-[var(--brand)] tracking-tight">BidUp</h1>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold tracking-[0.3em] text-green-700 uppercase">BID. WIN. DRIVE.</span>
+          <span class="text-[10px] text-slate-500 hidden sm:block">• Zimbabwe</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="liveIndicator" class="hidden md:flex items-center gap-1.5 text-xs">
+        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+        <span class="text-slate-600 font-medium">LIVE</span>
+      </div>
+      <button id="loginBtn" onclick="toggleAuth(true)" class="bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm transition">
+        Register to Bid
+      </button>
+      <div id="userMenu" class="hidden items-center gap-2">
+        <button onclick="showTab('dashboard')" class="bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl font-medium text-sm">
+          <span id="userEmail" class="hidden sm:inline">My Account</span>
+          <span class="sm:hidden">Account</span>
+        </button>
+        <button onclick="logout()" class="text-slate-500 hover:text-red-600 p-2.5" title="Logout">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<div class="max-w-7xl mx-auto mt-24 px-4 sm:px-6">
+  <div id="dashboardNav" class="flex gap-2 overflow-x-auto pb-2">
+    <button onclick="showTab('home')" data-tab="home" class="tab-btn active bg-[var(--brand)] text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm">Home</button>
+    <button onclick="showTab('auctions')" data-tab="auctions" class="tab-btn bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm">Live Auctions</button>
+    <button onclick="requireAuth('create')" data-tab="create" class="tab-btn bg-slate-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm relative">Sell Your Car <span class="auth-lock ml-1.5 text-[10px] opacity-70">🔒</span></button>
+    <button onclick="requireAuth('dashboard')" data-tab="dashboard" class="tab-btn bg-slate-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm relative">My Dashboard <span class="auth-lock ml-1.5 text-[10px] opacity-70">🔒</span></button>
+    <button onclick="showTab('rules')" data-tab="rules" class="tab-btn bg-slate-900 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm">Rules</button>
+  </div>
+</div>
+
+<!-- HOME - GREEN THEME PRESERVED -->
+<section id="tab-home" class="pt-6">
+<div class="bg-gradient-to-br from-green-800 via-[var(--brand)] to-emerald-600 text-white relative overflow-hidden">
+  <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1600')] opacity-5 bg-cover"></div>
+  <div class="max-w-7xl mx-auto px-6 py-16 md:py-24 relative">
+    <div class="max-w-3xl">
+      <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold tracking-wider mb-6">
+        <span class="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse"></span>
+        LIVE AUCTIONS NOW
+      </div>
+      <h1 class="text-5xl md:text-7xl font-black leading-[0.9] tracking-tight">Zimbabwe's Trusted Vehicle Auctions</h1>
+      <p class="mt-6 text-xl text-green-50 max-w-2xl leading-relaxed">Buy and sell quality vehicles through secure, transparent bidding. ZIMRA verified, CPA compliant.</p>
+      <div class="flex flex-wrap gap-3 mt-10">
+        <button onclick="showTab('auctions')" class="bg-white text-[var(--brand)] px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition transform hover:-translate-y-0.5">Browse Live Auctions →</button>
+        <button onclick="requireAuth('create')" class="bg-white/10 backdrop-blur border-2 border-white/30 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/20 transition">Sell Your Car</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="max-w-7xl mx-auto px-6 py-12 -mt-8 relative z-10">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm"><div class="text-3xl font-black text-[var(--brand)]">500+</div><div class="text-sm text-slate-600 mt-1">Vehicles Sold</div></div>
+  <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm"><div class="text-3xl font-black text-[var(--brand)]">98%</div><div class="text-sm text-slate-600 mt-1">Successful</div></div>
+  <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm"><div class="text-3xl font-black text-[var(--brand)]">24/7</div><div class="text-sm text-slate-600 mt-1">Live Bidding</div></div>
+  <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm"><div class="text-3xl font-black text-[var(--brand)]">100%</div><div class="text-sm text-slate-600 mt-1">Verified</div></div>
+</div>
+</div>
+</section>
+
+<!-- AUCTIONS -->
+<section id="tab-auctions" class="hidden max-w-7xl mx-auto px-6 py-8">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+    <div><h2 class="text-3xl md:text-4xl font-black tracking-tight">Live Auctions</h2><p class="text-slate-600 mt-1">Real-time bidding • Auto-extend 2min • WhatsApp alerts</p></div>
+  </div>
+  <div id="liveAuctionsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <div id="auctionDetail" class="hidden mt-12 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
+    <div class="grid lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <div class="flex justify-between items-start">
+          <div><h4 id="detailTitle" class="text-2xl md:text-3xl font-bold"></h4><p id="detailMeta" class="text-sm text-slate-500 mt-1"></p></div>
+          <div class="text-right"><div class="text-xs uppercase text-slate-500 tracking-wide">Time Left</div><div id="detailTimer" class="text-4xl font-black text-[var(--brand)] font-mono">00:00</div></div>
+        </div>
+        <img id="detailImage" src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800" class="w-full h-80 object-cover rounded-2xl mt-6 border">
+        <div class="grid grid-cols-3 gap-3 mt-6">
+          <div class="bg-slate-50 rounded-2xl p-4 text-center"><div class="text-xs text-slate-500 uppercase">Current</div><div id="detailPrice" class="text-2xl font-black mt-1">$0</div></div>
+          <div class="bg-slate-50 rounded-2xl p-4 text-center"><div class="text-xs text-slate-500 uppercase">Bids</div><div id="detailBids" class="text-2xl font-black mt-1">0</div></div>
+          <div class="bg-slate-50 rounded-2xl p-4 text-center"><div class="text-xs text-slate-500 uppercase">Watching</div><div id="detailWatchers" class="text-2xl font-black mt-1">0</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="bg-slate-900 text-white rounded-2xl p-5"><div class="text-sm font-bold mb-3 uppercase tracking-wide text-green-300">Recent Bids</div><div id="bidHistoryList" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div></div>
+        <div class="bg-gradient-to-br from-[var(--brand)] to-emerald-700 text-white rounded-2xl p-6 mt-4 shadow-lg">
+          <div class="text-xs uppercase tracking-widest opacity-80">Next Bid</div>
+          <div class="text-3xl font-black mt-1" id="detailNextBid">$0</div>
+          <button onclick="openBidModal()" class="w-full bg-white text-[var(--brand)] mt-5 py-3.5 rounded-xl font-bold text-lg">BID NOW</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SELL -->
+<section id="tab-create" class="hidden max-w-4xl mx-auto px-6 py-8">
+  <div class="text-center mb-8"><h2 class="text-3xl md:text-4xl font-black">Sell Your Vehicle</h2><p class="text-slate-600 mt-2">Free listing • Appears instantly</p></div>
+  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6"><div class="flex gap-3"><div class="text-2xl">🔒</div><div><div class="font-bold text-amber-900">Seller verification required</div><p class="text-sm text-amber-800 mt-1">Accept terms to unlock form</p></div></div></div>
+  <div class="bg-white border-2 border-slate-900 p-6 rounded-2xl mb-6">
+    <label class="flex items-start gap-3 cursor-pointer"><input id="acceptSellerTerms" type="checkbox" class="mt-1 w-5 h-5"><div><div class="font-bold">I accept Seller Terms</div><p class="text-sm text-slate-600 mt-1">I confirm ownership and accept auction rules</p></div></label>
+  </div>
+  <form id="sellForm" class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 space-y-6 opacity-40 pointer-events-none transition">
+    <div class="grid md:grid-cols-2 gap-5">
+      <div><label class="text-sm font-semibold">Vehicle Title *</label><input id="sellTitle" placeholder="2022 Toyota Hilux" class="w-full border rounded-xl px-4 py-3 mt-1.5" required></div>
+      <div><label class="text-sm font-semibold">Starting Price (USD) *</label><input id="sellPrice" type="number" placeholder="15000" class="w-full border rounded-xl px-4 py-3 mt-1.5" required></div>
+    </div>
+    <div class="grid md:grid-cols-4 gap-4">
+      <select id="sellLocation" class="border rounded-xl px-4 py-3"><option>Harare</option><option>Bulawayo</option><option>Beitbridge</option><option>Mutare</option></select>
+      <input id="sellYear" type="number" placeholder="Year" class="border rounded-xl px-4 py-3">
+      <input id="sellMileage" type="number" placeholder="Mileage" class="border rounded-xl px-4 py-3">
+      <input id="sellReg" placeholder="Reg No" class="border rounded-xl px-4 py-3">
+    </div>
+    <textarea id="sellDesc" placeholder="Description..." class="w-full border rounded-xl px-4 py-3 h-24"></textarea>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div><label class="text-sm font-semibold">Photos *</label><input id="sellPhotos" type="file" accept="image/*" multiple class="w-full mt-1.5"></div>
+      <div><label class="text-sm font-semibold">ZIMRA Document</label><input id="zimraDoc" type="file" accept="image/*,.pdf" class="w-full mt-1.5"><div id="zimraStatus" class="text-xs mt-2"></div></div>
+    </div>
+    <label class="flex items-center gap-3 p-4 bg-green-50 rounded-xl"><input type="checkbox" id="sellZimra" class="w-5 h-5"><span>ZIMRA duties paid</span></label>
+    <button type="submit" class="w-full bg-[var(--brand)] text-white py-4 rounded-xl font-bold text-lg">🚀 Publish Listing</button>
+  </form>
+</section>
+
+<!-- DASHBOARD -->
+<section id="tab-dashboard" class="hidden max-w-7xl mx-auto px-6 py-8">
+  <h2 class="text-3xl font-black mb-2">My Dashboard</h2>
+  <p class="text-slate-600 mb-8" id="welcomeUser">Welcome back</p>
+  <div class="grid md:grid-cols-3 gap-5">
+    <div class="bg-white border rounded-2xl p-6"><div class="text-sm text-slate-500">Active Bids</div><div id="dashActive" class="text-4xl font-black text-[var(--brand)] mt-2">0</div></div>
+    <div class="bg-white border rounded-2xl p-6"><div class="text-sm text-slate-500">Winning</div><div id="dashWinning" class="text-4xl font-black text-green-600 mt-2">0</div></div>
+    <div class="bg-white border rounded-2xl p-6"><div class="text-sm text-slate-500">Outbid</div><div id="dashOutbid" class="text-4xl font-black text-red-600 mt-2">0</div></div>
+  </div>
+</section>
+
+<!-- RULES -->
+<section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-8">
+  <h2 class="text-3xl font-black mb-6">Auction Rules</h2>
+  <div id="rulesContent" class="bg-white border rounded-2xl p-6"><p class="text-sm">Zimbabwe CPA compliant auctions.</p></div>
+  <label class="flex gap-2 mt-4"><input id="acceptTerms" type="checkbox"><span class="text-sm">I accept rules</span></label>
+  <button id="pdfBtn" onclick="downloadRulesPDF()" class="mt-3 bg-black text-white px-5 py-2.5 rounded-xl disabled:opacity-40">Download PDF</button>
+</section>
+
+<!-- AUTH -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl w-full max-w-md p-8">
+    <h3 class="text-2xl font-black text-center mb-2">Join BidUp</h3>
+    <p class="text-center text-slate-600 text-sm mb-6">Register to bid and sell</p>
+    <input id="email" class="w-full border rounded-xl p-3.5 mb-3" placeholder="Email">
+    <input id="phone" class="w-full border rounded-xl p-3.5 mb-3" placeholder="WhatsApp 26377...">
+    <input id="password" type="password" class="w-full border rounded-xl p-3.5 mb-5" placeholder="Password">
+    <button onclick="login()" class="w-full bg-[var(--brand)] text-white py-3.5 rounded-xl font-bold">Create Account</button>
+    <button onclick="toggleAuth(false)" class="w-full mt-3 text-slate-500 text-sm">Cancel</button>
+  </div>
+</div>
+
+<!-- BID MODAL -->
+<div id="bidModal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6">
+    <div class="flex justify-between"><h3 class="text-xl font-bold">Confirm Bid</h3><button onclick="closeBidModal()">✕</button></div>
+    <p id="bidModalVehicle" class="text-sm text-slate-600 mt-1"></p>
+    <div class="mt-4 bg-slate-50 rounded-xl p-4">
+      <div class="flex justify-between"><span>Current</span><span id="bidModalCurrent" class="font-bold"></span></div>
+      <div class="flex justify-between mt-1"><span>Your bid</span><span id="bidModalYour" class="font-black text-[var(--brand)] text-xl"></span></div>
+    </div>
+    <label class="flex gap-2 mt-4 text-xs"><input type="checkbox" id="bidAccept"><span>I accept auction rules</span></label>
+    <button id="confirmBidBtn" onclick="submitBid()" disabled class="w-full bg-slate-300 text-white mt-4 py-3 rounded-lg font-bold">Accept to bid</button>
+  </div>
+</div>
+
+<div id="mobileBidBar" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-3 z-40 hidden">
+  <div class="flex justify-between items-center"><div><div class="text-[11px] text-slate-500">Current</div><div id="mobilePrice" class="text-lg font-black">$0</div></div><button onclick="openBidModal()" class="bg-[var(--brand)] text-white px-6 py-3 rounded-xl font-bold">BID</button></div>
+</div>
+
+<script>
+const BACKEND_URL = "https://bidup-api.onrender.com";
+const TERMS_KEY = "bidup_terms_accepted";
+const SELLER_KEY = "bidup_seller_terms";
+let currentUser = JSON.parse(localStorage.getItem("user"));
+
+function showTab(tab){
+  document.querySelectorAll("section[id^='tab']").forEach(s => s.classList.add("hidden"));
+  document.getElementById("tab-" + tab)?.classList.remove("hidden");
+  
+  // Reset all tabs - give them default dark backgrounds
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active', 'bg-[var(--brand)]');
+    // Reset to default colors based on tab
+    const defaults = {
+      'home': 'bg-slate-800',
+      'auctions': 'bg-slate-800', 
+      'create': 'bg-slate-700',
+      'dashboard': 'bg-slate-600',
+      'rules': 'bg-slate-900'
+    };
+    // Remove all bg colors first
+    b.classList.remove('bg-[var(--brand)]', 'bg-slate-800', 'bg-slate-700', 'bg-slate-600', 'bg-slate-900');
+    // Add default
+    b.classList.add(defaults[b.dataset.tab] || 'bg-slate-800');
+  });
+  
+  // Highlight active tab in green
+  const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
+  if(activeBtn) {
+    activeBtn.classList.remove('bg-slate-800', 'bg-slate-700', 'bg-slate-600', 'bg-slate-900');
+    activeBtn.classList.add('active', 'bg-[var(--brand)]');
+  }
+  
+  if(tab==='auctions') setTimeout(loadLiveAuctions,100);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function requireAuth(tab){ if(!currentUser){ toggleAuth(true); localStorage.setItem('redirectAfterLogin',tab); return; } showTab(tab); }
+function updateAuthUI(){
+  const loggedIn = !!currentUser;
+  document.body.classList.toggle('logged-in', loggedIn);
+  document.getElementById('loginBtn').classList.toggle('hidden', loggedIn);
+  document.getElementById('userMenu').classList.toggle('hidden', !loggedIn);
+  document.getElementById('userMenu').classList.toggle('flex', loggedIn);
+  document.getElementById('liveIndicator').classList.toggle('hidden', !loggedIn);
+  if(loggedIn){ document.getElementById('userEmail').textContent = currentUser.email.split('@')[0]; document.getElementById('welcomeUser').textContent = `Welcome back, ${currentUser.email.split('@')[0]}`; }
+}
+function toggleAuth(show){ document.getElementById("authModal").classList.toggle("hidden", !show); }
+function login(){
+  const email=document.getElementById('email').value; const phone=document.getElementById('phone').value;
+  if(!email) return alert('Enter email');
+  currentUser={email,phone}; localStorage.setItem("user",JSON.stringify(currentUser));
+  toggleAuth(false); updateAuthUI();
+  const r=localStorage.getItem('redirectAfterLogin'); if(r){localStorage.removeItem('redirectAfterLogin'); showTab(r);} else showTab('dashboard');
+}
+function logout(){ localStorage.removeItem('user'); currentUser=null; updateAuthUI(); showTab('home'); }
+function updateLegalUI(){ document.getElementById("pdfBtn").disabled = localStorage.getItem(TERMS_KEY)!=="true"; }
+function updateSellerUI(){ const a=localStorage.getItem(SELLER_KEY)==="true"; const f=document.getElementById("sellForm"); if(f){ f.classList.toggle("pointer-events-none",!a); f.classList.toggle("opacity-40",!a); } }
+function downloadRulesPDF(){ if(localStorage.getItem(TERMS_KEY)!=="true") return alert("Accept first"); html2pdf().from(document.getElementById("rulesContent")).save("BidUp-Rules.pdf"); }
+
+window.addEventListener("DOMContentLoaded", () => {
+  updateAuthUI(); showTab("home");
+  const rt=document.getElementById("acceptTerms"); if(rt){ rt.checked=localStorage.getItem(TERMS_KEY)==="true"; rt.onchange=()=>{localStorage.setItem(TERMS_KEY,rt.checked); updateLegalUI();}; }
+  const st=document.getElementById("acceptSellerTerms"); if(st){ st.checked=localStorage.getItem(SELLER_KEY)==="true"; st.onchange=()=>{localStorage.setItem(SELLER_KEY,st.checked); updateSellerUI();}; }
+  updateLegalUI(); updateSellerUI();
+});
+
+/* ===== FULL LIVE AUCTION SYSTEM ===== */
+const socket = io(BACKEND_URL);
+const auctionTimers = new Map();
+const auctionData = new Map();
+let selectedAuction = null;
+const outbidSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+const bidSound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+
+socket.on('connect', () => { console.log('✅ Live'); document.getElementById('liveIndicator')?.classList.remove('hidden'); loadLiveAuctions(); });
+socket.on('bid_update', (data) => {
+  updateAuctionCard(data.auctionId, data.newPrice, data.bidCount);
+  if(data.endsAt) auctionTimers.set(data.auctionId, new Date(data.endsAt).getTime());
+  if(selectedAuction?._id===data.auctionId) updateDetailView(data);
+  const myBid=localStorage.getItem('lastBid_'+data.auctionId);
+  if(myBid && data.newPrice>parseInt(myBid) && data.bidder!==currentUser?.email){ outbidSound.play().catch(()=>{}); }
+  flashCard(data.auctionId);
+});
+socket.on('new_auction', loadLiveAuctions);
+socket.on('watchers_update', (d)=>{ document.querySelectorAll(`[data-watchers="${d.auctionId}"]`).forEach(e=>e.textContent=d.count); if(selectedAuction?._id===d.auctionId) document.getElementById('detailWatchers').textContent=d.count; });
+
+async function loadLiveAuctions(){
+  try{
+    const res=await fetch(`${BACKEND_URL}/api/auctions`); const auctions=await res.json();
+    auctionData.clear(); auctions.forEach(a=>auctionData.set(a._id,a));
+    const grid=document.getElementById('liveAuctionsGrid');
+    if(!auctions.length){ grid.innerHTML='<div class="col-span-3 text-center py-16 text-slate-500">No live auctions. List the first one!</div>'; return; }
+    grid.innerHTML=auctions.map(a=>{
+      auctionTimers.set(a._id,new Date(a.endsAt).getTime()); socket.emit('watch',a._id);
+      return `<div onclick="openAuctionDetail('${a._id}')" class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition cursor-pointer group" id="card-${a._id}">
+        <div class="relative">
+          <img src="${a.image||'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800'}" class="w-full h-52 object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute top-3 left-3 bg-black/80 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold" id="timer-${a._id}">--:--</div>
+          <div class="absolute top-3 right-3 ${a.zimraCleared?'bg-green-600':'bg-amber-600'} text-white px-2.5 py-1 rounded-lg text-[11px] font-bold">${a.zimraCleared?'ZIMRA ✓':'IN BOND'}</div>
+          <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span><span data-watchers="${a._id}">1</span> watching</div>
+        </div>
+        <div class="p-5">
+          <h3 class="font-bold text-lg leading-tight">${a.title}</h3>
+          <p class="text-xs text-slate-500 mt-1">${a.location} • ${a.year||''}</p>
+          <div class="flex items-end justify-between mt-4">
+            <div><div class="text-[11px] text-slate-500 uppercase">Current Bid</div><div class="text-2xl font-black text-[var(--brand)]" id="price-${a._id}">$${a.currentPrice.toLocaleString()}</div></div>
+            <div class="text-right"><div class="text-[11px] text-slate-500">Bids</div><div class="font-bold" id="bids-${a._id}">${a.bids?.length||0}</div></div>
+          </div>
+          <button onclick="event.stopPropagation(); quickBid('${a._id}',${a.currentPrice+(a.bidIncrement||250)})" class="w-full mt-4 bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-bold py-2.5 rounded-xl transition">Bid $${(a.currentPrice+(a.bidIncrement||250)).toLocaleString()}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){console.error(e);}
+}
+function openAuctionDetail(id){
+  const a=auctionData.get(id); if(!a) return; selectedAuction=a; socket.emit('watch',id);
+  document.getElementById('auctionDetail').classList.remove('hidden');
+  document.getElementById('detailTitle').textContent=a.title;
+  document.getElementById('detailMeta').textContent=`${a.location} • ${a.mileage?a.mileage.toLocaleString()+' km':''} • ${a.zimraCleared?'ZIMRA Cleared':'In Bond'}`;
+  document.getElementById('detailImage').src=a.image;
+  document.getElementById('detailPrice').textContent='$'+a.currentPrice.toLocaleString();
+  document.getElementById('detailBids').textContent=a.bids?.length||0;
+  document.getElementById('detailNextBid').textContent='$'+(a.currentPrice+(a.bidIncrement||250)).toLocaleString();
+  document.getElementById('mobileBidBar').classList.remove('hidden');
+  document.getElementById('mobilePrice').textContent='$'+a.currentPrice.toLocaleString();
+  loadBidHistory(id);
+  document.getElementById('auctionDetail').scrollIntoView({behavior:'smooth'});
+}
+function updateDetailView(d){ document.getElementById('detailPrice').textContent='$'+d.newPrice.toLocaleString(); document.getElementById('detailBids').textContent=d.bidCount; document.getElementById('detailNextBid').textContent='$'+(d.newPrice+250).toLocaleString(); document.getElementById('mobilePrice').textContent='$'+d.newPrice.toLocaleString(); }
+function updateAuctionCard(id,p,c){ const pe=document.getElementById(`price-${id}`); if(pe) pe.textContent='$'+p.toLocaleString(); const be=document.getElementById(`bids-${id}`); if(be&&c!==undefined) be.textContent=c; }
+function flashCard(id){ const c=document.getElementById(`card-${id}`); if(c){c.classList.add('ring-2','ring-green-500'); setTimeout(()=>c.classList.remove('ring-2','ring-green-500'),800);} }
+async function quickBid(id,amount){ if(!currentUser) return requireAuth(''); localStorage.setItem('lastBid_'+id,amount); try{ const res=await fetch(`${BACKEND_URL}/api/auctions/bid`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({auctionId:id,amount,bidder:currentUser.email,phone:currentUser.phone})}); const d=await res.json(); if(d.success) bidSound.play().catch(()=>{}); else alert(d.error); }catch(e){alert('Bid failed');} }
+async function loadBidHistory(id){ try{ const res=await fetch(`${BACKEND_URL}/api/auctions/${id}`); const a=await res.json(); const el=document.getElementById('bidHistoryList'); const bids=(a.bids||[]).slice().reverse().slice(0,10); el.innerHTML=bids.map(b=>`<div class="flex justify-between py-1.5 border-b border-slate-700 last:border-0"><span class="truncate">${b.user||b.bidder}</span><span class="font-bold text-green-400">$${b.amount.toLocaleString()}</span></div>`).join('')||'<div class="text-slate-500 text-xs">No bids yet</div>'; }catch(e){} }
+setInterval(()=>{ const now=Date.now(); auctionTimers.forEach((end,id)=>{ const el=document.getElementById(`timer-${id}`); if(!el) return; const diff=end-now; if(diff<=0){el.textContent='ENDED'; el.className='absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold'; return;} const m=Math.floor(diff/60000), s=Math.floor((diff%60000)/1000); el.textContent=`${m}:${s.toString().padStart(2,'0')}`; el.className=diff<60000?'absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold pulse-red':'absolute top-3 left-3 bg-black/80 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold'; const dt=document.getElementById('detailTimer'); if(selectedAuction?._id===id && dt) dt.textContent=el.textContent; }); },1000);
+
+/* SELL FORM */
+document.getElementById('sellForm')?.addEventListener('submit', async (e)=>{
+  e.preventDefault(); const btn=e.target.querySelector('button'); btn.disabled=true; btn.textContent='Publishing...';
+  const photo=document.getElementById('sellPhotos').files[0]; let img='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800'; if(photo) img=await new Promise(r=>{const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(photo);});
+  const auction={ title:document.getElementById('sellTitle').value, currentPrice:parseInt(document.getElementById('sellPrice').value), location:document.getElementById('sellLocation').value, year:parseInt(document.getElementById('sellYear').value)||undefined, mileage:parseInt(document.getElementById('sellMileage').value)||undefined, description:document.getElementById('sellDesc').value, image:img, zimraCleared:document.getElementById('sellZimra').checked, bidIncrement:250, endsAt:new Date(Date.now()+7*24*60*60*1000).toISOString(), seller:currentUser?.email||'guest', regNumber:document.getElementById('sellReg').value };
+  try{ const res=await fetch(`${BACKEND_URL}/api/auctions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(auction)}); if(res.ok){ alert('✅ Listed! Now live.'); showTab('auctions'); e.target.reset(); } }catch(e){} btn.disabled=false; btn.textContent='🚀 Publish Listing';
+});
+
+/* ZIMRA OCR */
+document.getElementById('zimraDoc')?.addEventListener('change', async (e)=>{
+  const file=e.target.files[0]; if(!file) return; const status=document.getElementById('zimraStatus'); status.textContent='🔍 Scanning...'; status.className='text-xs mt-2 text-amber-600';
+  try{ const worker=await Tesseract.createWorker('eng'); const {data:{text}}=await worker.recognize(file); await worker.terminate(); const ok=/ZIMRA|ZIMBABWE REVENUE|duty paid/i.test(text); if(ok){ status.innerHTML='✅ <strong>ZIMRA verified!</strong>'; status.className='text-xs mt-2 text-green-600 font-bold'; document.getElementById('sellZimra').checked=true; } else { status.textContent='⚠️ Manual review needed'; status.className='text-xs mt-2 text-amber-600'; } }catch(err){ status.textContent='Scan failed'; }
+});
+
+function openBidModal(){ if(!selectedAuction) return; if(!currentUser) return requireAuth(''); document.getElementById('bidModalVehicle').textContent=selectedAuction.title; document.getElementById('bidModalCurrent').textContent='$'+selectedAuction.currentPrice.toLocaleString(); const next=selectedAuction.currentPrice+250; document.getElementById('bidModalYour').textContent='$'+next.toLocaleString(); document.getElementById('bidModal').classList.remove('hidden'); document.getElementById('bidModal').dataset.amount=next; }
+function closeBidModal(){ document.getElementById('bidModal').classList.add('hidden'); }
+function submitBid(){ const amt=parseInt(document.getElementById('bidModal').dataset.amount); closeBidModal(); quickBid(selectedAuction._id, amt); }
+document.getElementById('bidAccept')?.addEventListener('change', e=>{ const b=document.getElementById('confirmBidBtn'); b.disabled=!e.target.checked; b.className=e.target.checked?'w-full bg-[var(--brand)] text-white mt-4 py-3 rounded-lg font-bold':'w-full bg-slate-300 text-white mt-4 py-3 rounded-lg font-bold'; });
+</script>
+</body>
+</html>
