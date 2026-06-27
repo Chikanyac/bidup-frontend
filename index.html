@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,6 +68,7 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
     <button onclick="showTab('auctions')" data-tab="auctions" class="tab-btn bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm">Live Auctions</button>
     <button onclick="requireAuth('create')" data-tab="create" class="tab-btn bg-slate-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm relative">Sell Your Car <span class="auth-lock ml-1.5 text-[10px] opacity-70">🔒</span></button>
     <button onclick="requireAuth('dashboard')" data-tab="dashboard" class="tab-btn bg-slate-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm relative">My Dashboard <span class="auth-lock ml-1.5 text-[10px] opacity-70">🔒</span></button>
+    <button onclick="showTab('checklist')" data-tab="checklist" class="tab-btn bg-teal-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm">Seller Checklist</button>
     <button onclick="showTab('rules')" data-tab="rules" class="tab-btn bg-slate-900 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm">Rules</button>
   </div>
 </div>
@@ -136,6 +138,23 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
 <section id="tab-create" class="hidden max-w-4xl mx-auto px-6 py-8">
   <div class="text-center mb-8"><h2 class="text-3xl md:text-4xl font-black">Sell Your Vehicle</h2><p class="text-slate-600 mt-2">Free listing • Appears instantly</p></div>
   <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6"><div class="flex gap-3"><div class="text-2xl">🔒</div><div><div class="font-bold text-amber-900">Seller verification required</div><p class="text-sm text-amber-800 mt-1">Accept terms to unlock form</p></div></div></div>
+  
+    </div>
+    <div class="p-6">
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <h4 class="font-bold text-amber-900">ZIMRA 14-Day Notice</h4>
+          <p class="text-sm text-amber-800 mt-1">Seller must notify ZIMRA within 14 days. BidUp auto-files via CVR4.</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <h4 class="font-bold text-red-900">SI 59 of 2026</h4>
+          <p class="text-sm text-red-800 mt-1">Vehicles over 10 years old cannot be registered unless exempt.</p>
+        </div>
+      </div>
+      <div id="checklist-items" class="space-y-6"></div>
+    </div>
+  </div>
+
   <div class="bg-white border-2 border-slate-900 p-6 rounded-2xl mb-6">
     <label class="flex items-start gap-3 cursor-pointer"><input id="acceptSellerTerms" type="checkbox" class="mt-1 w-5 h-5"><div><div class="font-bold">I accept Seller Terms</div><p class="text-sm text-slate-600 mt-1">I confirm ownership and accept auction rules</p></div></label>
   </div>
@@ -171,12 +190,104 @@ body{font-family:Outfit,sans-serif;background:#f8fafc;}
   </div>
 </section>
 
+
+<!-- CHECKLIST TAB -->
+<section id="tab-checklist" class="hidden max-w-5xl mx-auto px-6 py-8">
+  <div class="text-center mb-8">
+    <h2 class="text-3xl md:text-4xl font-black">Seller Onboarding</h2>
+    <p class="text-slate-600 mt-2">Complete before listing - Zimbabwe compliant</p>
+  </div>
+  
+  <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden mb-8 shadow-sm">
+    <div class="bg-gradient-to-r from-[var(--brand)] to-emerald-700 px-6 py-6 text-white">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h3 class="text-2xl font-bold">Seller Onboarding Checklist</h3>
+          <p class="text-white/80 text-sm mt-1">Complete these steps — progress saves automatically</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="print-checklist" type="button" class="bg-white/15 hover:bg-white/25 backdrop-blur px-4 py-2 rounded-lg text-sm font-medium">Print / PDF</button>
+          <button id="reset-checklist" type="button" class="bg-white/15 hover:bg-white/25 backdrop-blur px-4 py-2 rounded-lg text-sm font-medium">Reset</button>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-xs mb-1.5"><span>Progress</span><span id="progress-text" class="font-semibold">0 of 18</span></div>
+        <div class="h-2 bg-white/20 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-white w-0 transition-all duration-500"></div></div>
+      </div>
+</section>
+
+
 <!-- RULES -->
 <section id="tab-rules" class="hidden max-w-4xl mx-auto px-6 py-8">
-  <h2 class="text-3xl font-black mb-6">Auction Rules</h2>
-  <div id="rulesContent" class="bg-white border rounded-2xl p-6"><p class="text-sm">Zimbabwe CPA compliant auctions.</p></div>
-  <label class="flex gap-2 mt-4"><input id="acceptTerms" type="checkbox"><span class="text-sm">I accept rules</span></label>
-  <button id="pdfBtn" onclick="downloadRulesPDF()" class="mt-3 bg-black text-white px-5 py-2.5 rounded-xl disabled:opacity-40">Download PDF</button>
+
+  <h2 class="text-3xl font-black mb-2">Auction Rules</h2>
+  <p class="text-slate-600 mb-6">BidUp Marketplace — Zimbabwe Vehicle Auctions v1.2</p>
+  
+  <div id="rulesContent" class="bg-white border rounded-2xl p-6 md:p-8">
+    <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl mb-8">
+      <p class="text-sm text-amber-900"><strong>Disclaimer:</strong> This is a template for operational use. Final legal review by a Zimbabwean attorney is required. Must comply with Consumer Protection Act [Chapter 14:44], ZIMRA regulations, and CVR requirements.</p>
+    </div>
+
+    <div class="space-y-8 text-[15px] leading-relaxed">
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">1. Definitions</h3>
+        <p><strong>"Auctioneer"</strong> means BidUp Marketplace. <strong>"Buyer"</strong> means successful bidder. <strong>"Hammer Price"</strong> means final bid accepted. <strong>"Reserve"</strong> means confidential minimum price. <strong>"CVR4"</strong> means Change of Ownership form.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">2. Legal Framework</h3>
+        <p>All auctions governed by Zimbabwe law. Consumer Protection Act cooling-off rights apply to private buyers (7 days). Commercial buyers are excluded. ZIMRA VAT and presumptive tax obligations apply where relevant.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">3. Registration to Bid</h3>
+        <p>Bidders must provide National ID/Passport, proof of residence, and pay refundable $100 USD bidding deposit. BidUp verifies identity via KYC. Bidding constitutes legal offer to purchase.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">4. Vehicle Eligibility & Disclosures</h3>
+        <p>Vehicles must be: (a) less than 10 years old per SI 59/2026 unless exempt, (b) duty fully paid with proof, (c) ZRP police clearance valid, (d) roadworthy or sold "as is" with disclosure. Sellers warrant clear title, no encumbrances.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">5. Auction Format</h3>
+        <p>English ascending auction online. 5-minute anti-sniping: any bid in final 5 minutes extends auction by 5 minutes. Bids are in USD or ZiG at daily RBZ interbank rate +2%. Bids are binding.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">6. Reserve Prices</h3>
+        <p>Seller may set reserve. If not met, vehicle is "passed in". BidUp may negotiate post-auction within 48 hours.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">7. Taxes, Duties & Fees</h3>
+        <p>Buyer pays: Hammer price + 8% buyer's premium (capped $800) + $50 documentation fee + ZINARA transfer $30. Seller pays 5% commission (capped $500). All payments via BidUp escrow.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">8. Change of Ownership</h3>
+        <p>BidUp lodges CVR4 with Central Vehicle Registry. Seller must sign CVR4 and provide copy of ID. ZIMRA 14-day change of ownership notification is mandatory per seller. Buyer receives registration book within 14 working days after payment clearance.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">9. Risk & Delivery</h3>
+        <p>Risk passes to buyer on full payment. Vehicle must be collected within 72 hours from designated yard (Harare/Bulawayo). Storage $20/day after.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">10. Cooling-Off Period</h3>
+        <p>Per CPA Section 56, private consumers may cancel within 7 days if vehicle not collected and misrepresentation proven. Does NOT apply to commercial entities or auctions where reserve met and correctly described.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">11. Default by Buyer or Seller</h3>
+        <p>Buyer default: deposit forfeited, vehicle re-listed, buyer liable for deficiency. Seller default: $500 penalty, listing removed. BidUp reserves right to ban.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">12. Privacy & Data</h3>
+        <p>Personal data processed per Zimbabwe Data Protection Act. ID numbers encrypted. Vehicle history retained 7 years for ZIMRA audit.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-2 text-[var(--brand)]">13. Governing Law</h3>
+        <p>Laws of Zimbabwe. Disputes: mediation first, then Harare Magistrates Court jurisdiction.</p>
+      </div>
+    </div>
+  </div>
+  <div class="mt-6 flex flex-wrap gap-4 items-center">
+    <label class="flex gap-2 items-center"><input id="acceptTerms" type="checkbox" class="w-5 h-5"><span class="text-sm font-medium">I accept the auction rules</span></label>
+    <button id="pdfBtn" onclick="downloadRulesPDF()" class="bg-[var(--brand)] text-white px-5 py-2.5 rounded-xl font-semibold disabled:opacity-40">Download Rules PDF</button>
+  </div>
+
 </section>
 
 <!-- AUTH -->
@@ -268,7 +379,7 @@ function login(){
 function logout(){ localStorage.removeItem('user'); currentUser=null; updateAuthUI(); showTab('home'); }
 function updateLegalUI(){ document.getElementById("pdfBtn").disabled = localStorage.getItem(TERMS_KEY)!=="true"; }
 function updateSellerUI(){ const a=localStorage.getItem(SELLER_KEY)==="true"; const f=document.getElementById("sellForm"); if(f){ f.classList.toggle("pointer-events-none",!a); f.classList.toggle("opacity-40",!a); } }
-function downloadRulesPDF(){ if(localStorage.getItem(TERMS_KEY)!=="true") return alert("Accept first"); html2pdf().from(document.getElementById("rulesContent")).save("BidUp-Rules.pdf"); }
+
 
 window.addEventListener("DOMContentLoaded", () => {
   updateAuthUI(); showTab("home");
@@ -364,6 +475,130 @@ function openBidModal(){ if(!selectedAuction) return; if(!currentUser) return re
 function closeBidModal(){ document.getElementById('bidModal').classList.add('hidden'); }
 function submitBid(){ const amt=parseInt(document.getElementById('bidModal').dataset.amount); closeBidModal(); quickBid(selectedAuction._id, amt); }
 document.getElementById('bidAccept')?.addEventListener('change', e=>{ const b=document.getElementById('confirmBidBtn'); b.disabled=!e.target.checked; b.className=e.target.checked?'w-full bg-[var(--brand)] text-white mt-4 py-3 rounded-lg font-bold':'w-full bg-slate-300 text-white mt-4 py-3 rounded-lg font-bold'; });
+
+/* ===== SELLER CHECKLIST FROM COMBINING-SITE-FILES ===== */
+const checklistData = [
+  { group: '1. Seller Verification', items: [
+    { id: 'id_copy', label: 'Valid National ID or Passport (certified copy uploaded)' },
+    { id: 'por', label: 'Proof of Residence (utility bill <3 months)' },
+    { id: 'mobile', label: 'Active mobile number & email verified via OTP' },
+    { id: 'tin', label: 'ZIMRA ITF263 Tax Clearance (if selling as business/trader)' },
+  ]},
+  { group: '2. Vehicle Documents', items: [
+    { id: 'reg_book', label: 'Original Vehicle Registration Book (in seller name)' },
+    { id: 'cvr4', label: 'Signed CVR4 Form (seller section complete, buyer blank)' },
+    { id: 'zinara', label: 'Valid ZINARA licence disk' },
+    { id: 'zrp', label: 'ZRP Police Clearance Certificate (issued within 14 days)' },
+    { id: 'duty', label: 'Import Duty Receipt + Bill of Entry (for imports) OR Affidavit of local purchase' },
+    { id: 'service', label: 'Service history book / records (if available)' },
+  ]},
+  { group: '3. Listing Preparation', items: [
+    { id: 'photos', label: '15+ photos: front, rear, sides, interior, odometer, engine bay, VIN/chassis stamp' },
+    { id: 'video', label: '30-60 second walkaround video' },
+    { id: 'disclose', label: 'Full defect disclosure: accidents, mechanical faults, warning lights' },
+    { id: 'reserve', label: 'Set realistic reserve price (we provide market guide)' },
+  ]},
+  { group: '4. Legal Compliance', items: [
+    { id: 'age', label: 'Confirm vehicle <10 years from manufacture (SI 59/2026) OR upload exemption letter' },
+    { id: 'zimra14', label: 'Acknowledge ZIMRA 14-day change of ownership notification duty' },
+    { id: 'fees', label: 'Accept BidUp seller fee: 5% (capped at $500 USD)' },
+    { id: 'cpa', label: 'Agree to CPA disclosure (private buyer 7-day cooling-off rights)' },
+  ]},
+];
+
+function initChecklist(){
+  const container = document.getElementById('checklist-items');
+  if(!container) return;
+  const STORAGE_KEY = 'bidup-checklist-v1';
+  let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  
+  container.innerHTML = '';
+  checklistData.forEach(section => {
+    const secDiv = document.createElement('div');
+    secDiv.innerHTML = `<h4 class="font-bold text-lg mb-3 pb-2 border-b border-slate-200">${section.group}</h4><div class="space-y-2"></div>`;
+    const list = secDiv.querySelector('div');
+    section.items.forEach(it => {
+      const checked = saved[it.id] ? 'checked' : '';
+      const item = document.createElement('label');
+      item.className = 'flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer border border-transparent hover:border-slate-200';
+      item.innerHTML = `<input type="checkbox" data-id="${it.id}" ${checked} class="mt-0.5 w-5 h-5 rounded border-slate-300 text-[var(--brand)] focus:ring-[var(--brand)]"><span class="text-[14px] leading-snug">${it.label}</span>`;
+      list.appendChild(item);
+    });
+    container.appendChild(secDiv);
+  });
+
+  function updateProgress() {
+    const total = document.querySelectorAll('#checklist-items input').length;
+    const done = document.querySelectorAll('#checklist-items input:checked').length;
+    document.getElementById('progress-text').textContent = `${done} of ${total}`;
+    document.getElementById('progress-bar').style.width = (done/total*100) + '%';
+  }
+
+  container.addEventListener('change', e => {
+    if (e.target.matches('input[type="checkbox"]')) {
+      saved[e.target.dataset.id] = e.target.checked;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      updateProgress();
+    }
+  });
+
+  document.getElementById('reset-checklist')?.addEventListener('click', () => {
+    if (confirm('Reset all checklist items?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      document.querySelectorAll('#checklist-items input').forEach(i => i.checked = false);
+      saved = {};
+      updateProgress();
+    }
+  });
+
+  document.getElementById('print-checklist')?.addEventListener('click', () => {
+    const el = document.getElementById('seller-checklist') || document.querySelector('#checklist-items').parentElement.parentElement;
+    html2pdf().from(el).set({margin:0.5, filename:'BidUp-Seller-Checklist.pdf'}).save();
+  });
+
+  updateProgress();
+}
+
+
+function downloadRulesPDF(){ 
+  if(localStorage.getItem(TERMS_KEY)!=="true") return alert("Please accept the rules first");
+  
+  // Create styled wrapper with BidUp header
+  const source = document.getElementById("rulesContent");
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `
+    <div style="font-family: Outfit, sans-serif; padding: 30px;">
+      <div style="border-bottom: 3px solid #0a7c5a; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="color:#0a7c5a; font-size:28px; font-weight:900; margin:0; letter-spacing:-0.5px;">BidUp</h1>
+          <div style="font-size:10px; font-weight:700; color:#065f46; letter-spacing:2px; margin-top:2px;">BID. WIN. DRIVE.</div>
+        </div>
+        <div style="text-align:right; font-size:11px; color:#64748b;">
+          <div>Zimbabwe Vehicle Auctions</div>
+          <div>${new Date().toLocaleDateString('en-ZA', {year:'numeric', month:'long', day:'numeric'})}</div>
+        </div>
+      </div>
+      ${source.innerHTML}
+      <div style="margin-top:40px; padding-top:15px; border-top:1px solid #e2e8f0; font-size:10px; color:#94a3b8; text-align:center;">
+        BidUp Marketplace • bidup.co.zw • Compliant with CPA [Chapter 14:44] & ZIMRA Regulations
+      </div>
+    </div>
+  `;
+  
+  const opt = { 
+    margin: 0.4, 
+    filename: 'BidUp-Auction-Rules.pdf', 
+    image: {type:'jpeg', quality:0.98}, 
+    html2canvas:{scale:2, useCORS:true}, 
+    jsPDF:{unit:'in', format:'a4', orientation:'portrait'} 
+  };
+  html2pdf().set(opt).from(wrapper).save(); 
+}
+
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', initChecklist);
+
 </script>
 </body>
 </html>
