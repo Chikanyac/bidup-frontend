@@ -512,7 +512,6 @@ const DUMMY_AUCTIONS = [
   }
 ];
 
-
 async function loadLiveAuctions(){
   try{
     const res = await fetch(`${BACKEND_URL}/api/auctions`);
@@ -520,53 +519,33 @@ async function loadLiveAuctions(){
     var auctions = await res.json();
     if(!auctions.length) throw new Error('empty');
   }catch(e){
-    console.log('Loading demo from JSON', e.message);
-    try {
-      const demoRes = await fetch('./dummy-auctions.json');
-      var auctions = await demoRes.json();
-    } catch {
-      var auctions = DUMMY_AUCTIONS || [];
-    }
+    console.log('Using demo auctions', e.message);
+    var auctions = DUMMY_AUCTIONS;
   }
-  
-  auctionData.clear(); 
-  auctions.forEach(a=>auctionData.set(a._id,a));
-  const grid=document.getElementById('liveAuctionsGrid');
-  if(!auctions.length){ 
-    grid.innerHTML='<div class="col-span-3 text-center py-16 text-slate-500">No live auctions. List the first one!</div>'; 
-    return; 
-  }
-  
-  grid.innerHTML=auctions.map(a=>{
-    const isSold = a.status === 'sold';
-    const endTime = new Date(a.endsAt).getTime();
-    auctionTimers.set(a._id, endTime);
-    if(!isSold) socket.emit('watch',a._id);
-    
-    return `<div ${isSold ? '' : `onclick="openAuctionDetail('${a._id}')"`} class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm ${isSold ? 'opacity-75' : 'hover:shadow-xl cursor-pointer'} transition group" id="card-${a._id}">
-      <div class="relative">
-        <img src="${a.image||a.photos?.[0]||'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800'}" class="w-full h-52 object-cover ${isSold ? 'grayscale' : 'group-hover:scale-105'} transition duration-500">
-        ${isSold ? 
-          `<div class="absolute inset-0 bg-black/60 flex items-center justify-center"><div class="bg-red-600 text-white px-6 py-3 rounded-xl font-black text-xl rotate-[-8deg] shadow-xl">SOLD</div></div>
-           <div class="absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold">ENDED</div>` :
-          `<div class="absolute top-3 left-3 bg-black/80 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold" id="timer-${a._id}">--:--</div>`
-        }
-        <div class="absolute top-3 right-3 ${a.zimraCleared?'bg-green-600':'bg-amber-600'} text-white px-2.5 py-1 rounded-lg text-[11px] font-bold">${a.zimraCleared?'ZIMRA ✓':'IN BOND'}</div>
-        ${!isSold ? `<div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span><span data-watchers="${a._id}">${a.watchers||1}</span> watching</div>` : ''}
-      </div>
-      <div class="p-5">
-        <h3 class="font-bold text-lg leading-tight">${a.title}</h3>
-        <p class="text-xs text-slate-500 mt-1">${a.location} • ${a.year||''} • ${a.mileage?.toLocaleString()||''} km</p>
-        <div class="flex items-end justify-between mt-4">
-          <div><div class="text-[11px] text-slate-500 uppercase">${isSold ? 'Sold For' : 'Current Bid'}</div><div class="text-2xl font-black ${isSold ? 'text-slate-600' : 'text-[var(--brand)]'}" id="price-${a._id}">$${a.currentPrice.toLocaleString()}</div></div>
-          <div class="text-right"><div class="text-[11px] text-slate-500">Bids</div><div class="font-bold" id="bids-${a._id}">${a.bidCount||a.bids?.length||0}</div></div>
+    auctionData.clear(); auctions.forEach(a=>auctionData.set(a._id,a));
+    const grid=document.getElementById('liveAuctionsGrid');
+    if(!auctions.length){ grid.innerHTML='<div class="col-span-3 text-center py-16 text-slate-500">No live auctions. List the first one!</div>'; return; }
+    grid.innerHTML=auctions.map(a=>{
+      auctionTimers.set(a._id,new Date(a.endsAt).getTime()); socket.emit('watch',a._id);
+      return `<div onclick="openAuctionDetail('${a._id}')" class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition cursor-pointer group" id="card-${a._id}">
+        <div class="relative">
+          <img src="${a.image||'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800'}" class="w-full h-52 object-cover group-hover:scale-105 transition duration-500">
+          <div class="absolute top-3 left-3 bg-black/80 text-white px-2.5 py-1 rounded-lg text-xs font-mono font-bold" id="timer-${a._id}">--:--</div>
+          <div class="absolute top-3 right-3 ${a.zimraCleared?'bg-green-600':'bg-amber-600'} text-white px-2.5 py-1 rounded-lg text-[11px] font-bold">${a.zimraCleared?'ZIMRA ✓':'IN BOND'}</div>
+          <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span><span data-watchers="${a._id}">1</span> watching</div>
         </div>
-        ${!isSold ? `<button class="w-full mt-4 ${a.seller?.verified ? 'bg-[var(--brand)]' : 'bg-slate-700'} text-white py-2.5 rounded-xl font-semibold text-sm">Place Bid</button>` : `<div class="w-full mt-4 bg-slate-100 text-slate-500 py-2.5 rounded-xl font-semibold text-sm text-center">Auction Closed</div>`}
-      </div>
-    </div>`;
-  }).join('');
-}
-catch(e){console.error(e);}
+        <div class="p-5">
+          <h3 class="font-bold text-lg leading-tight">${a.title}</h3>
+          <p class="text-xs text-slate-500 mt-1">${a.location} • ${a.year||''}</p>
+          <div class="flex items-end justify-between mt-4">
+            <div><div class="text-[11px] text-slate-500 uppercase">Current Bid</div><div class="text-2xl font-black text-[var(--brand)]" id="price-${a._id}">$${a.currentPrice.toLocaleString()}</div></div>
+            <div class="text-right"><div class="text-[11px] text-slate-500">Bids</div><div class="font-bold" id="bids-${a._id}">${a.bids?.length||0}</div></div>
+          </div>
+          <button onclick="event.stopPropagation(); quickBid('${a._id}',${a.currentPrice+(a.bidIncrement||250)})" class="w-full mt-4 bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white font-bold py-2.5 rounded-xl transition">Bid $${(a.currentPrice+(a.bidIncrement||250)).toLocaleString()}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){console.error(e);}
 }
 function openAuctionDetail(id){
   const a=auctionData.get(id); if(!a) return; selectedAuction=a; socket.emit('watch',id);
