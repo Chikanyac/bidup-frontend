@@ -614,10 +614,116 @@ function downloadBuyerPDF(){
   html2pdf().set(opt).from(document.getElementById("buyerTermsContent")).save();
 }
 
+
+
+
+
 function downloadRulesPDF(){ 
   if(localStorage.getItem(TERMS_KEY)!=="true") return alert("Please accept the rules first");
-  const opt = { margin: 0.5, filename: 'BidUp-Auction-Rules.pdf', image: {type:'jpeg', quality:0.98}, html2canvas:{scale:2}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'} };
-  html2pdf().set(opt).from(document.getElementById("rulesContent")).save(); 
+  
+  const dateStr = new Date().toLocaleDateString('en-ZA', {year:'numeric', month:'long', day:'numeric'});
+  const content = `
+<div style="font-family:Arial,sans-serif; color:#1e293b; line-height:1.6; max-width:700px; margin:0 auto; padding:20px;">
+  <div style="border-bottom:3px solid #0a7c5a; padding-bottom:15px; margin-bottom:25px; display:flex; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:48px; height:48px; background:#0a7c5a; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:24px;">B</div>
+      <div>
+        <div style="color:#0a7c5a; font-size:24px; font-weight:900; line-height:1;">BidUp</div>
+        <div style="font-size:10px; color:#065f46; letter-spacing:1px;">BID. WIN. DRIVE.</div>
+      </div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#64748b;">
+      <div>Zimbabwe Vehicle Auctions</div>
+      <div>DATE_PLACEHOLDER</div>
+    </div>
+  </div>
+  
+  <h1 style="font-size:22px; margin:0 0 5px;">Auction Rules & Terms</h1>
+  <p style="color:#64748b; margin:0 0 20px; font-size:14px;">BidUp Marketplace — Version 1.2</p>
+  
+  <div style="background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; margin-bottom:20px; font-size:13px;">
+    <strong>Disclaimer:</strong> Final legal review by Zimbabwean attorney required. Complies with CPA [Chapter 14:44], ZIMRA, CVR.
+  </div>
+
+  <h3 style="color:#0a7c5a; font-size:16px; margin-top:20px;">1. Definitions</h3>
+  <p style="font-size:14px;">"Auctioneer" means BidUp Marketplace. "Buyer" means successful bidder. "Hammer Price" means final bid accepted. "Reserve" means confidential minimum. "CVR4" means Change of Ownership.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">2. Legal Framework</h3>
+  <p style="font-size:14px;">All auctions governed by Zimbabwe law. CPA cooling-off (7 days) applies to private buyers. Commercial excluded.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">3. Registration to Bid</h3>
+  <p style="font-size:14px;">ID/Passport, proof of residence, $100 refundable deposit required. KYC verification mandatory.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">4. Vehicle Eligibility</h3>
+  <p style="font-size:14px;">Must be <10 years per SI 59/2026 (unless exempt), duty paid, ZRP clearance valid, roadworthy or disclosed "as is".</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">5. Auction Format</h3>
+  <p style="font-size:14px;">English ascending. 5-min anti-sniping extends auction. Bids in USD or ZiG (RBZ+2%). Binding.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">6. Reserve Prices</h3>
+  <p style="font-size:14px;">Seller may set reserve. If not met, "passed in". BidUp may negotiate within 48hrs.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">7. Fees</h3>
+  <p style="font-size:14px;">Buyer: Hammer + 8% premium (capped $800) + $50 doc + $30 ZINARA. Seller: 5% commission (capped $500). Escrow only.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">8. Change of Ownership</h3>
+  <p style="font-size:14px;">BidUp lodges CVR4 within 5 days. Buyer receives book within 14 working days after payment. ZIMRA 14-day notice mandatory.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">9. Risk & Delivery</h3>
+  <p style="font-size:14px;">Risk passes on full payment. Collect within 72hrs (Harare/Bulawayo). Storage $20/day after.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">10. Cooling-Off</h3>
+  <p style="font-size:14px;">CPA Sec 56: private buyers may cancel within 7 days if not collected AND misrepresentation proven.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">11. Default</h3>
+  <p style="font-size:14px;">Buyer default: deposit forfeited, re-listed, liable for shortfall. Seller default: $500 penalty.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">12. Privacy</h3>
+  <p style="font-size:14px;">Data processed per Zimbabwe Data Protection Act. Retained 7 years for ZIMRA audit.</p>
+  
+  <h3 style="color:#0a7c5a; font-size:16px;">13. Governing Law</h3>
+  <p style="font-size:14px;">Laws of Zimbabwe. Mediation first, then Harare Magistrates Court.</p>
+  
+  <div style="margin-top:30px; padding-top:15px; border-top:1px solid #e2e8f0; font-size:10px; color:#94a3b8; text-align:center;">
+    BidUp Marketplace • bidup.co.zw • © 2026
+  </div>
+</div>
+`.replace('DATE_PLACEHOLDER', dateStr);
+  
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = content;
+  wrapper.style.position = 'absolute';
+  wrapper.style.left = '-9999px';
+  document.body.appendChild(wrapper);
+  
+  const opt = { 
+    margin: 0.5, 
+    filename: 'BidUp-Auction-Rules.pdf', 
+    image: {type:'jpeg', quality:0.98}, 
+    html2canvas:{scale:1.5, useCORS:true}, 
+    jsPDF:{unit:'in', format:'a4', orientation:'portrait'},
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+  
+  html2pdf().set(opt).from(wrapper.firstElementChild).save().then(() => {
+    document.body.removeChild(wrapper);
+  });
+}
+
+
+function downloadBuyerPDF(){
+  const source = document.getElementById("buyerTermsContent");
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'absolute';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.width = '794px';
+  wrapper.style.background = 'white';
+  wrapper.innerHTML = source.innerHTML;
+  document.body.appendChild(wrapper);
+  
+  const opt = { margin: 0.5, filename: 'BidUp-Buyer-Terms.pdf', image: {type:'jpeg', quality:0.98}, html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'in', format:'letter', orientation:'portrait'} };
+  html2pdf().set(opt).from(wrapper).save().then(() => document.body.removeChild(wrapper));
 }
 
 // Initialize on load
